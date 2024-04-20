@@ -45,7 +45,7 @@ for (genus in genus_hostplants) {
   diet_01[, str_detect(colnames(diet_01), paste0("^", genus))] <- 1
 }
 
-#DOWNLOADING PRECIPITATION DATA (example) - code can be applied to download past and future data 
+#DOWNLOADING PRECIPITATION DATA FOR ALL RESOLUTIONS - code can be applied to download past and future data 
 # Downloading Past Precipitation data to calculate current levels
 # Prec 2.5min
 # crop to UK
@@ -224,3 +224,366 @@ new_headers <- gsub("\\.", "_", new_headers)
 # Rename the columns in the dataframe with the simplified header names
 colnames(prec_10min_spatial_df) <- new_headers
 
+
+#DOWNLOADING TEMPERATURE DATA FOR ALL RESOLUTIONS - code can be applied to download past and future data 
+# Tmin 2.5 min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'tmin' in their names
+tmin_files <- files[grepl("tmin", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+
+# Loop through each file in prec_files_list
+for (file in tmin_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'CroppedWCPastTmincropped' in their names
+cropped_tmin_files_list <- list.files(pattern = "CroppedWCPastTmincropped", full.names = TRUE)
+
+# Load all tmin GeoTIFF files as a list of raster objects
+cropped_tmin_files_list <- lapply(cropped_tmin_files_list, raster)
+
+# Combine the tmin raster objects into a single raster stack
+tmin_raster_stack <- stack(cropped_tmin_files_list)
+
+# Convert the tmin raster stack into a spatial data frame
+tmin_spatial_2_5_df <- as.data.frame(tmin_raster_stack, xy = TRUE)
+
+# rename headers tmin
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(tmin_spatial_2_5_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(tmin_spatial_2_5_df) <- new_headers
+
+
+# Tmax 2.5 min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'tmax' in their names
+tmax_files <- files[grepl("tmax", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+
+# Loop through each file in tmax_files_list
+for (file in tmax_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'CroppedWCPastTmaxcropped' in their names
+cropped_tmax_files_list <- list.files(pattern = "CroppedWCPastTmaxcropped", full.names = TRUE)
+
+# Load all tmax GeoTIFF files as a list of raster objects
+cropped_tmax_files_list <- lapply(cropped_tmax_files_list, raster)
+
+# Combine the tmax raster objects into a single raster stack
+tmax_raster_stack <- stack(cropped_tmax_files_list)
+
+# Convert the prec raster stack into a spatial data frame
+tmax_spatial_2_5_df <- as.data.frame(tmax_raster_stack, xy = TRUE)
+
+# rename headers tmax
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(tmax_spatial_2_5_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(tmax_spatial_2_5_df) <- new_headers
+
+
+# Tmin 5 min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'tmin' in their names
+tmin_files <- files[grepl("tmin", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+# Loop through each file in tmin_files_list
+for (file in tmin_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'CroppedWCPastTmincropped' in their names
+cropped_tmin_files_list <- list.files(pattern = "CroppedWCPastTmin_5mincropped", full.names = TRUE)
+
+# Load all tmin GeoTIFF files as a list of raster objects
+cropped_tmin_files_list <- lapply(cropped_tmin_files_list, raster)
+
+# Combine the tmin raster objects into a single raster stack
+tmin_raster_stack <- stack(cropped_tmin_files_list)
+
+# Convert the tmin raster stack into a spatial data frame
+tmin_5min_spatial_df <- as.data.frame(tmin_raster_stack, xy = TRUE)
+
+# rename headers tmin
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(tmin_5min_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(tmin_5min_spatial_df) <- new_headers
+
+
+# Tmax 5 min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'tmax' in their names
+tmax_files <- files[grepl("tmax", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+
+# Loop through each file in tmax_files_list
+for (file in tmax_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'CroppedWCPastTmaxcropped' in their names
+cropped_tmax_files_list <- list.files(pattern = "CroppedWCPastTmax_5mincropped", full.names = TRUE)
+
+# Load all tmax GeoTIFF files as a list of raster objects
+cropped_tmax_files_list <- lapply(cropped_tmax_files_list, raster)
+
+# Combine the tmax raster objects into a single raster stack
+tmax_raster_stack <- stack(cropped_tmax_files_list)
+
+# Convert the prec raster stack into a spatial data frame
+tmax_5min_spatial_df <- as.data.frame(tmax_raster_stack, xy = TRUE)
+
+# rename headers tmax
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(tmax_5min_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(tmax_5min_spatial_df) <- new_headers
+
+# Tmin 10 min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'tmin' in their names
+tmin_files <- files[grepl("tmin", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+# Loop through each file in tmin_files_list
+for (file in tmin_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'CroppedWCPastTmincropped' in their names
+cropped_tmin_files_list <- list.files(pattern = "CroppedWCPastTmin_10mincropped", full.names = TRUE)
+
+# Load all tmin GeoTIFF files as a list of raster objects
+cropped_tmin_files_list <- lapply(cropped_tmin_files_list, raster)
+
+# Combine the tmin raster objects into a single raster stack
+tmin_raster_stack <- stack(cropped_tmin_files_list)
+
+# Convert the tmin raster stack into a spatial data frame
+tmin_10min_spatial_df <- as.data.frame(tmin_raster_stack, xy = TRUE)
+
+# rename headers tmin
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(tmin_10min_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(tmin_10min_spatial_df) <- new_headers
+
+
+# Tmax 10 min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/WCPastTemp_10min")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'tmax' in their names
+tmax_files <- files[grepl("tmax", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+
+# Loop through each file in tmax_files_list
+for (file in tmax_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'CroppedWCPastTmaxcropped' in their names
+cropped_tmax_files_list <- list.files(pattern = "CroppedWCPastTmax_10mincropped", full.names = TRUE)
+
+# Load all tmax GeoTIFF files as a list of raster objects
+cropped_tmax_files_list <- lapply(cropped_tmax_files_list, raster)
+
+# Combine the tmax raster objects into a single raster stack
+tmax_raster_stack <- stack(cropped_tmax_files_list)
+
+# Convert the prec raster stack into a spatial data frame
+tmax_10min_spatial_df <- as.data.frame(tmax_raster_stack, xy = TRUE)
+
+# rename headers tmax
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(tmax_10min_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(tmax_10min_spatial_df) <- new_headers
