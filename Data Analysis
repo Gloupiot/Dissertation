@@ -1,0 +1,263 @@
+library(AER)
+library(MASS)
+library(MuMIn)
+library(pscl)
+
+
+# BUILD MODELS BUTTERLIES 3 RESOLUTIONS
+# Model with all variables - 2.5 min - butterflies
+but.mod_2_5_a_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_temp+avg_max_prec+avg_total_prec+
+                                avg_min_prec+elevation,data = sites_cond_2_5, na.action="na.fail") 
+# check multicollinearity
+vif(but.mod_2_5_a_nbglm) # most problematic is avg_total_prec (highest VIF)
+
+# model without most problematic variable
+but.mod_2_5_b_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_temp+avg_max_prec+
+                                avg_min_prec+elevation,data = sites_cond_2_5, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_2_5_b_nbglm) # most problematic is avg_temp (highest VIF)
+
+# model without most problematic variable
+but.mod_2_5_c_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_max_prec+
+                                avg_min_prec+elevation,data = sites_cond_2_5, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_2_5_c_nbglm) # most problematic is avg_min_prec (highest VIF)
+
+# model without most problematic variable
+but.mod_2_5_d_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+
+                                avg_max_prec+elevation,data = sites_cond_2_5, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_2_5_d_nbglm) # all under 4
+
+# Find best models with dredge
+dredge_2_5 <- dredge(but.mod_2_5_d_nbglm)
+
+# best models (delta AIC > 2)
+top_model_2_5_a <- get.models(dredge_2_5, subset = 1)[[1]] #avg_max_prec, avg_tmax, avg_tmin, elevation, x
+top_model_2_5_b <- get.models(dredge_2_5, subset = 2)[[1]] #avg_tmax, avg_tmin, elevation, x
+
+
+# Model with all variables - 5 min - butterflies
+but.mod_5_a_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_temp+avg_max_prec+avg_total_prec+
+                                avg_min_prec+elevation,data = sites_cond_5, na.action="na.fail") 
+# check multicollinearity
+vif(but.mod_5_a_nbglm) # most problematic is avg_total_prec (highest VIF)
+
+# model without most problematic variable
+but.mod_5_b_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_temp+avg_max_prec+
+                                avg_min_prec+elevation,data = sites_cond_5, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_5_b_nbglm) # most problematic is avg_temp (highest VIF)
+
+# model without most problematic variable
+but.mod_5_c_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_max_prec+
+                                avg_min_prec+elevation,data = sites_cond_5, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_5_c_nbglm) # most problematic is avg_min_prec (highest VIF)
+
+# model without most problematic variable
+but.mod_5_d_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+
+                                avg_max_prec+elevation,data = sites_cond_5, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_5_d_nbglm) # all under 4
+
+# Find best models with dredge
+dredge_5 <- dredge(but.mod_5_d_nbglm)
+
+# best models (delta AIC > 2)
+top_model_5_a <- get.models(dredge_2_5, subset = 1)[[1]] #avg_max_prec, avg_tmax, elevation, x
+top_model_5_b <- get.models(dredge_2_5, subset = 2)[[1]] #avg_max_prec, avg_tmin, avg_tmax, elevation, x
+
+
+# Model with all variables - 10 min - butterflies
+but.mod_10_a_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_temp+avg_max_prec+avg_total_prec+
+                              avg_min_prec+elevation,data = sites_cond_10_filter, na.action="na.fail") 
+# check multicollinearity
+vif(but.mod_10_a_nbglm) # most problematic is avg_total_prec (highest VIF)
+
+# model without most problematic variable
+but.mod_10_b_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_temp+avg_max_prec+
+                              avg_min_prec+elevation,data = sites_cond_10_filter, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_10_b_nbglm) # most problematic is avg_temp (highest VIF)
+
+# model without most problematic variable
+but.mod_10_c_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_max_prec+
+                              avg_min_prec+elevation,data = sites_cond_10_filter, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_10_c_nbglm) # most problematic is avg_min_prec (highest VIF)
+
+# model without most problematic variable
+but.mod_10_d_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+
+                              avg_max_prec+elevation,data = sites_cond_10, na.action="na.fail") 
+
+# check multicollinearity
+vif(but.mod_10_d_nbglm) # all under 7
+
+
+# Find best models with dredge
+dredge_10 <- dredge(but.mod_10_d_nbglm)
+
+# best models (delta AIC > 2)
+top_model_10_a <- get.models(dredge_10, subset = 1)[[1]] #avg_max_prec, avg_tmax, avg_tmin, elevation
+top_model_10_b <- get.models(dredge_10, subset = 2)[[1]] #avg_max_prec, avg_tmax, avg_tmin, elevation, x
+
+# Cross-validation
+# select train and validation data - 2.5 minutes trained = 70% = 10912
+sites_cond_2_5_NoNA <- sites_cond_2_5[!is.na(sites_cond_2_5$richness),]
+train.select <- sample(nrow(sites_cond_2_5_NoNA),10912)
+val.select <-c(1:nrow(sites_cond_2_5_NoNA))[-train.select]
+sites_cond_2_5.train <- sites_cond_2_5_NoNA[train.select,]
+sites_cond_2_5.val <- sites_cond_2_5_NoNA[train.select,]
+
+# top_model_2_5_a #avg_tmax, avg_tmin, elevation, x
+# top_model_2_5_b #avg_min_prec, avg_tmax, avg_tmin, elevation, x
+
+top_model_2_5_a_train <- glm.nb(richness~x+avg_tmin+avg_tmax+elevation,data = sites_cond_2_5.train)
+val.pred <- predict.glm(object=top_model_2_5_a_train,newdata = sites_cond_2_5.val)
+cor.test(sites_cond_2_5.val$richness,val.pred) #cor = 0.3913368 
+
+top_model_2_5_b_train <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_min_prec+elevation,data = sites_cond_2_5.train)
+val.pred <- predict.glm(object=top_model_2_5_b_train,newdata = sites_cond_2_5.val)
+cor.test(sites_cond_2_5.val$richness,val.pred) #cor = 0.3911432 
+
+# select train and validation data - 5 minutes trained = 70% = 3708
+sites_cond_5_NoNA <- sites_cond_5[!is.na(sites_cond_5$richness),]
+train.select <- sample(nrow(sites_cond_5_NoNA),3708)
+val.select <-c(1:nrow(sites_cond_5_NoNA))[-train.select]
+sites_cond_5.train <- sites_cond_5_NoNA[train.select,]
+sites_cond_5.val <- sites_cond_5_NoNA[train.select,]
+
+# top_model_5_a #avg_max_prec, avg_tmax, elevation, x
+# top_model_5_b #avg_max_prec, avg_tmin, avg_tmax, elevation, x
+
+top_model_5_a_train <- glm.nb(richness~x+avg_tmax+avg_max_prec+elevation,data = sites_cond_5.train)
+val.pred <- predict.glm(object=top_model_5_a_train,newdata = sites_cond_5.val)
+cor.test(sites_cond_5.val$richness,val.pred) #cor = 0.5212607 
+
+top_model_5_b_train <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_min_prec+elevation,data = sites_cond_5.train)
+val.pred <- predict.glm(object=top_model_5_b_train,newdata = sites_cond_5.val)
+cor.test(sites_cond_5.val$richness,val.pred) #cor = 0.5191177 
+
+# select train and validation data - 10 minutes trained = 70% = 770
+sites_cond_10_NoNA <- sites_cond_10_filter[!is.na(sites_cond_10_filter$richness),]
+train.select <- sample(nrow(sites_cond_10_NoNA),770)
+val.select <-c(1:nrow(sites_cond_10_NoNA))[-train.select]
+sites_cond_10.train <- sites_cond_10_NoNA[train.select,]
+sites_cond_10.val <- sites_cond_10_NoNA[train.select,]
+
+# top_model_10_a  #avg_max_prec, avg_tmax, avg_tmin, elevation
+# top_model_10_b  #avg_max_prec, avg_tmax, avg_tmin, elevation, x
+
+top_model_10_a_train <- glm.nb(richness~avg_tmax+avg_max_prec+avg_tmin+elevation,data = sites_cond_10.train)
+val.pred <- predict.glm(object=top_model_10_a_train,newdata = sites_cond_10.val)
+cor.test(sites_cond_10.val$richness,val.pred) #cor = 0.7153185 
+
+top_model_10_b_train <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_max_prec+elevation,data = sites_cond_10.train)
+val.pred <- predict.glm(object=top_model_10_b_train,newdata = sites_cond_10.val)
+cor.test(sites_cond_10.val$richness,val.pred) #cor = 0.7143151
+
+
+# top_model_10_a  #avg_max_prec, avg_tmax, avg_tmin, elevation = best model bc best corr
+# check top_model_10_a model statistical results
+summary(top_model_10_a)
+pR2(top_model_10_a)
+
+# MODEL BUILDING INTERCATIONS (ONLY 10 MINUTES TO BE COMPARABLE WITH BUTTERFLIES)
+# Model - 10 min - interactions (same model as for butterflies as environmental variables used are the same)
+
+# model without all problematic variables
+int.mod_10_d_nbglm <- glm.nb(richness~x+avg_tmin+avg_tmax+
+                               avg_max_prec+elevation,data = sites_cond_10_int_filter, na.action="na.fail") 
+
+# Find best models with dredge
+dredge_10 <- dredge(int.mod_10_d_nbglm)
+
+# best models (delta AIC > 2)
+top_model_10_int_a <- get.models(dredge_10, subset = 1)[[1]] #avg_tmax, avg_tmin, elevation
+top_model_10_int_b <- get.models(dredge_10, subset = 2)[[1]] #avg_tmax, avg_tmin, elevation, x
+top_model_10_int_c <- get.models(dredge_10, subset = 3)[[1]] #avg_max_prec, avg_tmax, avg_tmin, elevation
+top_model_10_int_d <- get.models(dredge_10, subset = 4)[[1]] #avg_max_prec, avg_tmax, avg_tmin, elevation, x
+
+
+# Cross validation
+# select train and validation data - 10 minutes trained = 70% = 770
+sites_cond_10_int_NoNA <- sites_cond_10_filter[!is.na(sites_cond_10_int_filter$richness),]
+train.select <- sample(nrow(sites_cond_10_int_NoNA),770)
+val.select <-c(1:nrow(sites_cond_10_int_NoNA))[-train.select]
+sites_cond_10.train <- sites_cond_10_int_NoNA[train.select,]
+sites_cond_10.val <- sites_cond_10_int_NoNA[train.select,]
+
+top_model_10_a_train <- glm.nb(richness~avg_tmax+avg_tmin+elevation,data = sites_cond_10.train)
+val.pred <- predict.glm(object=top_model_10_a_train,newdata = sites_cond_10.val)
+cor.test(sites_cond_10.val$richness,val.pred) #cor = 0.7110728 
+
+top_model_10_b_train <- glm.nb(richness~x+avg_tmax+avg_tmin+elevation,data = sites_cond_10.train)
+val.pred <- predict.glm(object=top_model_10_b_train,newdata = sites_cond_10.val)
+cor.test(sites_cond_10.val$richness,val.pred) #cor = 0.7103245 
+
+top_model_10_c_train <- glm.nb(richness~avg_max_prec+avg_tmax+avg_tmin+elevation,data = sites_cond_10.train)
+val.pred <- predict.glm(object=top_model_10_c_train,newdata = sites_cond_10.val)
+cor.test(sites_cond_10.val$richness,val.pred) #cor = 0.7181802 
+
+top_model_10_d_train <- glm.nb(richness~x+avg_tmin+avg_tmax+avg_max_prec+elevation,data = sites_cond_10.train)
+val.pred <- predict.glm(object=top_model_10_d_train,newdata = sites_cond_10.val)
+cor.test(sites_cond_10.val$richness,val.pred) #cor = 0.7170271 
+
+# top model for interactions = top_model_10_int_c
+
+# Compare driver importance
+# butterflies
+sites_cond_10_filter.resc <- sites_cond_10_filter
+for(i in 4:10){
+  sites_cond_10_filter.resc[,i] <- (sites_cond_10_filter.resc[,i]-min(sites_cond_10_filter.resc[,i]))/(max(sites_cond_10_filter.resc[,i])-min(sites_cond_10_filter.resc[,i]))
+}
+
+top_model_10_a.resc <-  glm.nb(formula = richness ~ avg_max_prec + avg_tmax + avg_tmin + 
+                                 elevation + 1, data = sites_cond_10_filter.resc, na.action = "na.fail", 
+                               init.theta = 69.29906304, link = log)
+
+summary(top_model_10_a.resc)
+
+sites_cond_10_int_filter.resc <- sites_cond_10_int_filter
+for(i in 4:10){
+  sites_cond_10_int_filter.resc[,i] <- (sites_cond_10_int_filter.resc[,i]-min(sites_cond_10_int_filter.resc[,i]))/(max(sites_cond_10_int_filter.resc[,i])-min(sites_cond_10_filter.resc[,i]))
+}
+
+top_model_10_int_c.resc <-  glm.nb(formula = richness ~ avg_max_prec + avg_tmax + avg_tmin + 
+                                     elevation + 1, data = sites_cond_10_int_filter.resc, na.action = "na.fail", 
+                                   init.theta = 7.241022174, link = log)
+
+summary(top_model_10_int_c.resc)
+
+
+# Extract the model coefficients and standard errors - Butterflies
+coef_table_resc <- summary(top_model_10_a.resc)$coefficients
+
+# Create the model_results data frame
+model_results_resc <- data.frame(
+  taxon = rownames(coef_table_resc),
+  coef = coef_table_resc[, "Estimate"],
+  se = coef_table_resc[, "Std. Error"]
+)
+
+# Reorder the rows to match the desired order (e.g., alphabetical)
+model_results_resc <- model_results_resc[order(model_results_resc$taxon), ]
+
+# Extract the model coefficients and standard errors - Interactions
+coef_table_resc_int <- summary(top_model_10_int_c.resc)$coefficients
+
+# Create the model_results data frame
+model_results_resc_int <- data.frame(
+  taxon = rownames(coef_table_resc_int),
+  coef = coef_table_resc_int[, "Estimate"],
+  se = coef_table_resc_int[, "Std. Error"]
+)
