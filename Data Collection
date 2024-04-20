@@ -1,9 +1,44 @@
+library(tidyr)
+library(dplyr)
+library(stringr)
+
 #DOWNLOAD GBIF BUTTERFLY AND HOSTPLANT OCCURENCE, KEEP ONLY RELEVANT COLUMNS AND BUTTERFLIES
 columns_to_keep <- c("gbifID", "year", "month", "day", "decimalLatitude", "decimalLongitude", "kingdom", "phylum", "class", "order", "family", "genus", "taxonRank", "taxonKey", "species")
-
 butterflies <- fread("path_to_file",
                     sep = "\t", select = c(columns_to_keep, NA, NA))
 hostplants <- fread("path_to_file",
                     sep = "\t", select = c(columns_to_keep, NA, NA))
-
 butterflies <- butterflies[!(butterflies$species %in% c('Vanessa cardui', 'Colias croceus')), ]
+
+  # Get unique host plant names from the original dataframe
+hostplant_names <- unique(unlist(diet[, -1]))
+
+  # Create a new empty dataframe with host plants as columns and butterfly species as rows
+diet_01 <- data.frame(matrix(0, nrow = nrow(diet), ncol = length(hostplant_names)))
+colnames(diet_01) <- hostplant_names
+rownames(diet_01) <- diet$species
+
+  # Update the new dataframe based on interactions in the original dataframe
+for (i in 1:nrow(diet)) {
+  for (j in 2:ncol(diet)) {
+    if (as.character(diet[i, j]) %in% colnames(diet_01)) {
+      diet_01[i, as.character(diet[i, j])] <- 1
+     }
+   }
+}
+hostplant_species <- unique(hostplants$species)
+
+# add the hostplants not included in the diet dataframe (part of a butterlfy's diet only throuh genus)
+doubles <- names(diet_01)
+new_column_names <- setdiff(hostplant_species, doubles)
+diet_01 <- cbind(diet_01, matrix(0, nrow = nrow(diet_01), ncol = length(new_column_names), dimnames = list(NULL, new_column_names)))
+diet_01.save <- diet_01
+
+# remove genus columns to keep only species
+column_names <- names(diet_01)
+single_word_cols <- sapply(column_names, function(x) length(strsplit(x, " ")[[1]]) == 1)
+diet_01 <- diet_01[, !single_word_cols]
+is_genus <- names(diet_01)[sapply(names(diet_01), function(x) length(strsplit(x, " ")) == 1)]
+for (genus in genus_hostplants) {
+  diet_01[, str_detect(colnames(diet_01), paste0("^", genus))] <- 1
+}
