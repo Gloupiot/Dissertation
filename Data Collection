@@ -1,6 +1,8 @@
 library(tidyr)
 library(dplyr)
 library(stringr)
+library(raster)
+library(sp)
 
 #DOWNLOAD GBIF BUTTERFLY AND HOSTPLANT OCCURENCE, KEEP ONLY RELEVANT COLUMNS AND BUTTERFLIES
 columns_to_keep <- c("gbifID", "year", "month", "day", "decimalLatitude", "decimalLongitude", "kingdom", "phylum", "class", "order", "family", "genus", "taxonRank", "taxonKey", "species")
@@ -42,3 +44,183 @@ is_genus <- names(diet_01)[sapply(names(diet_01), function(x) length(strsplit(x,
 for (genus in genus_hostplants) {
   diet_01[, str_detect(colnames(diet_01), paste0("^", genus))] <- 1
 }
+
+#DOWNLOADING PRECIPITATION DATA (example) - code can be applied to download past and future data 
+# Downloading Past Precipitation data to calculate current levels
+# Prec 2.5min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'prec' in their names
+prec_files <- files[grepl("prec", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- ""path_to_folder"
+
+# Loop through each file in prec_files_list
+for (file in prec_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# Filter the files that contain 'prec' in their names
+cropped_prec_files_list <- list.files(pattern = "CroppedWCPastPreccropped", full.names = TRUE)
+
+# Load all prec GeoTIFF files as a list of raster objects
+cropped_prec_files_list <- lapply(cropped_prec_files_list, raster)
+
+# Combine the prec raster objects into a single raster stack
+prec_raster_stack <- stack(cropped_prec_files_list)
+
+# Convert the prec raster stack into a spatial data frame
+prec_spatial_df <- as.data.frame(prec_raster_stack, xy = TRUE)
+
+# rename headers prec
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(prec_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(prec_spatial_df) <- new_headers
+
+# Prec 5min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("path_to_directory")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'prec' in their names
+prec_files <- files[grepl("prec", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "path_to_folder"
+
+# Loop through each file in prec_files_list
+for (file in prec_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/CroppedWCPastPrec_5min")
+
+# Filter the files that contain 'prec' in their names
+cropped_prec_files_list <- list.files(pattern = "CroppedWCPastPrec_5min", full.names = TRUE)
+
+# Load all prec GeoTIFF files as a list of raster objects
+cropped_prec_files_list <- lapply(cropped_prec_files_list, raster)
+
+# Combine the prec raster objects into a single raster stack
+prec_5min_raster_stack <- stack(cropped_prec_files_list)
+
+# Convert the prec raster stack into a spatial data frame
+prec_5min_spatial_df <- as.data.frame(prec_5min_raster_stack, xy = TRUE)
+
+# rename headers prec
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(prec_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(prec_5min_spatial_df) <- new_headers
+
+# Prec 10min
+# crop to UK
+# Set the directory where your GeoTIFF files are stored
+setwd("/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/WCPastPrec_10min")
+
+# List all GeoTIFF files in the working directory
+files <- list.files(pattern = "\\.tif$", full.names = TRUE)
+
+# Filter the files that contain 'prec' in their names
+prec_files <- files[grepl("prec", files)]
+
+# Define the output folder where you want to save the files
+output_folder <- "/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/CroppedWCPastPrec_10min"
+
+# Loop through each file in prec_files_list
+for (file in prec_files) {
+  # Read the raster file
+  global_raster <- raster(file)
+  
+  # Define the extent for the UK (xmin, xmax, ymin, ymax)
+  uk_extent <- c(-9, 3, 49, 61.2)
+  
+  # Crop the global raster to the UK extent
+  uk_raster <- crop(global_raster, extent(uk_extent))
+  
+  # Define a new filename for the cropped raster
+  new_filename <- paste0(output_folder, "cropped_", basename(file), '.tif')
+  
+  # Export the cropped raster to a new file in the specified folder
+  writeRaster(uk_raster, filename = new_filename, format = "GTiff", overwrite = TRUE)
+}
+
+# Transform rasters into one spatial dataframe
+# Set the directory where your GeoTIFF files are stored
+setwd("/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/CroppedWCPastPrec_10min")
+
+# Filter the files that contain 'prec' in their names
+cropped_prec_files_list <- list.files(pattern = "CroppedWCPastPrec_10min", full.names = TRUE)
+
+# Load all prec GeoTIFF files as a list of raster objects
+cropped_prec_files_list <- lapply(cropped_prec_files_list, raster)
+
+# Combine the prec raster objects into a single raster stack
+prec_10min_raster_stack <- stack(cropped_prec_files_list)
+
+# Convert the prec raster stack into a spatial data frame
+prec_10min_spatial_df <- as.data.frame(prec_10min_raster_stack, xy = TRUE)
+
+# rename headers prec
+# Define a pattern to exclude specific columns like 'x' and 'y'
+pattern_to_exclude <- "^x$|^y$"
+
+# Extract only the "year"."month_in_numbers" part from the header names for non-excluded columns
+new_headers <- gsub(paste0(".*(", pattern_to_exclude, "|(\\d{4})\\.\\d{2})\\.tif$"), "\\1", colnames(prec_10min_spatial_df), perl = TRUE)
+new_headers <- gsub("\\.", "_", new_headers)
+
+# Rename the columns in the dataframe with the simplified header names
+colnames(prec_10min_spatial_df) <- new_headers
+
