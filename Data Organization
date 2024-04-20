@@ -1,0 +1,374 @@
+library(raster)
+library(data.table)
+
+#CREATE SITES
+# create sites of ~5 km2
+res(tmin_raster_stack_2_5) #res = 0.04166667
+cells_2_5 <- data.frame(x = prec_spatial_df$x, y = prec_spatial_df$y) #x and y = center of the cell
+cells_2_5$lat_min <- cells_2_5$y - 0.04166667/2
+cells_2_5$lat_max <- cells_2_5$y + 0.04166667/2
+cells_2_5$lon_min <- cells_2_5$x - 0.04166667/2
+cells_2_5$lon_max <- cells_2_5$x + 0.04166667/2
+cells_2_5$cell_ID <- seq_len(nrow(cells_2_5))
+
+# create sites of ~9 km2
+res(tmin_raster_stack_5) #res = 0.08333333
+cells_5 <- data.frame(x = prec_5min_spatial_df$x, y = prec_5min_spatial_df$y) #x and y = center of the cell
+cells_5$lat_min <- cells_5$y - 0.08333333/2
+cells_5$lat_max <- cells_5$y + 0.08333333/2
+cells_5$lon_min <- cells_5$x - 0.08333333/2
+cells_5$lon_max <- cells_5$x + 0.08333333/2
+cells_5$cell_ID <- seq_len(nrow(cells_5))
+
+# create sites of ~19 km2
+res(tmin_raster_stack_10) #res = 0.1666667
+cells_10 <- data.frame(x = prec_10min_spatial_df$x, y = prec_10min_spatial_df$y) #x and y = center of the cell
+cells_10$lat_min <- cells_10$y - 0.1666667/2
+cells_10$lat_max <- cells_10$y + 0.1666667/2
+cells_10$lon_min <- cells_10$x - 0.1666667/2
+cells_10$lon_max <- cells_10$x + 0.1666667/2
+cells_10$cell_ID <- seq_len(nrow(cells_10))
+
+#EXTRACT AVERAGE ANNUAL MINIMUM AND MAXIMUM AND ASSIGN DATA TO SITES (3 resolutions) - precipitation as an example
+# average wettest month per year per site - 2.5min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_spatial_df), by = 12)
+
+# Initialize a matrix to store the highest values for each group
+all_row_data <- as.matrix(prec_spatial_df)
+highest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  max_values <- apply(all_row_data[, start_col:end_col], 1, max)
+  
+  # Store the highest values in the matrix
+  highest_values_matrix[, i] <- max_values
+}
+
+# make dataframe 
+highest_values_df <- as.data.frame(highest_values_matrix)
+
+# Calculate the average wettest month for each row
+highest_values_df$average_wettest_month <- rowMeans(highest_values_df, na.rm = TRUE)
+
+# make dataframe with average wettest month and coordinates
+avg_max_prec_2_5_df <- data.frame(x = prec_spatial_df$x, y = prec_spatial_df$y,
+                              average_wettest_month = highest_values_df$average_wettest_month,
+                              ID = NA)
+
+# average driest month per year per site - 2.5min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_spatial_df), by = 12)
+
+# Initialize a matrix to store the lowest values for each group
+all_row_data <- as.matrix(prec_spatial_df)
+lowest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the lowest value in each group of 12 columns for all rows
+  min_values <- apply(all_row_data[, start_col:end_col], 1, min)
+  
+  # Store the lowest values in the matrix
+  lowest_values_matrix[, i] <- min_values
+}
+
+# make dataframe 
+lowest_values_df <- as.data.frame(lowest_values_matrix)
+
+# Calculate the average driest month for each row
+lowest_values_df$average_driest_month <- rowMeans(lowest_values_df, na.rm = TRUE)
+
+# make dataframe with average driest month and coordinates
+avg_min_prec_2_5_df <- data.frame(x = prec_spatial_df$x, y = prec_spatial_df$y,
+                              average_driest_month = lowest_values_df$average_driest_month,
+                              ID = NA)
+
+# total precipitation per year per site - 2.5min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_spatial_df), by = 12)
+
+# Initialize a matrix to store the sum for each group (annual total precipitation)
+all_row_data <- as.matrix(prec_spatial_df)
+annual_total_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the value for each group of 12 columns for all rows
+  tot_values <- apply(all_row_data[, start_col:end_col], 1, sum)
+  
+  # Store the lowest values in the matrix
+  annual_total_matrix[, i] <- tot_values
+}
+
+# make dataframe 
+annual_total_df <- as.data.frame(annual_total_matrix)
+
+# Calculate the average annual total precipitation for each row
+annual_total_df$average_annual_total_prec <- rowMeans(annual_total_df, na.rm = TRUE)
+
+# make dataframe with average annual total precipitation and coordinates
+avg_annual_total_2_5_df <- data.frame(x = prec_spatial_df$x, y = prec_spatial_df$y,
+                                  average_annual_total_prec = annual_total_df$average_annual_total_prec,
+                              ID = NA)
+# prec site allocation
+setDT(avg_max_prec_2_5_df)
+setDT(avg_min_prec_2_5_df)
+setDT(avg_annual_total_2_5_df)
+setDT(cells_2_5)
+
+# Create prec_sites and assigning each observation to one cell
+prec_wet_sites_2_5 <- cells_2_5[avg_max_prec_2_5_df, on = .(lat_min <= y, lat_max >= y,
+                                                lon_min <= x, lon_max >= x),
+                        .(average_wettest_month = i.average_wettest_month,
+                          y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+prec_dry_sites_2_5 <- cells_2_5[avg_min_prec_2_5_df, on = .(lat_min <= y, lat_max >= y,
+                                                    lon_min <= x, lon_max >= x),
+                            .(average_driest_month = i.average_driest_month,
+                              y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+prec_total_sites_2_5 <- cells_2_5[avg_annual_total_2_5_df, on = .(lat_min <= y, lat_max >= y,
+                                                    lon_min <= x, lon_max >= x),
+                            .(average_annual_total_prec = i.average_annual_total_prec,
+                              y, x, cell_ID = x.cell_ID), mult = "first"] 
+  
+# average wettest month per year per site - 5min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_5min_spatial_df), by = 12)
+
+# Initialize a matrix to store the highest values for each group
+all_row_data <- as.matrix(prec_5min_spatial_df)
+highest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  max_values <- apply(all_row_data[, start_col:end_col], 1, max)
+  
+  # Store the highest values in the matrix
+  highest_values_matrix[, i] <- max_values
+}
+
+# make dataframe 
+highest_values_df <- as.data.frame(highest_values_matrix)
+
+# Calculate the average wettest month for each row
+highest_values_df$average_wettest_month <- rowMeans(highest_values_df, na.rm = TRUE)
+
+# make dataframe with average wettest month and coordinates
+avg_max_prec_5_df <- data.frame(x = prec_5min_spatial_df$x, y = prec_5min_spatial_df$y,
+                              average_wettest_month = highest_values_df$average_wettest_month,
+                              ID = NA)
+
+# average driest month per year per site - 5min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_5min_spatial_df), by = 12)
+
+# Initialize a matrix to store the lowest values for each group
+all_row_data <- as.matrix(prec_5min_spatial_df)
+lowest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the lowest value in each group of 12 columns for all rows
+  min_values <- apply(all_row_data[, start_col:end_col], 1, min)
+  
+  # Store the lowest values in the matrix
+  lowest_values_matrix[, i] <- min_values
+}
+
+# make dataframe 
+lowest_values_df <- as.data.frame(lowest_values_matrix)
+
+# Calculate the average driest month for each row
+lowest_values_df$average_driest_month <- rowMeans(lowest_values_df, na.rm = TRUE)
+
+# make dataframe with average driest month and coordinates
+avg_min_prec_5_df <- data.frame(x = prec_5min_spatial_df$x, y = prec_5min_spatial_df$y,
+                              average_driest_month = lowest_values_df$average_driest_month,
+                              ID = NA)
+
+# total precipitation per year per site - 5min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_5min_spatial_df), by = 12)
+
+# Initialize a matrix to store the sum for each group (annual total precipitation)
+all_row_data <- as.matrix(prec_5min_spatial_df)
+annual_total_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the total value for each group of 12 columns for all rows
+  tot_values <- apply(all_row_data[, start_col:end_col], 1, sum)
+  
+  # Store the sum in the matrix
+  annual_total_matrix[, i] <- tot_values
+}
+
+# make dataframe 
+annual_total_df <- as.data.frame(annual_total_matrix)
+
+# Calculate the average annual total precipitation for each row
+annual_total_df$average_annual_total_prec <- rowMeans(annual_total_df, na.rm = TRUE)
+
+# make dataframe with average wettest month and coordinates
+avg_annual_total_5_df <- data.frame(x = prec_5min_spatial_df$x, y = prec_5min_spatial_df$y,
+                                  average_annual_total_prec = annual_total_df$average_annual_total_prec,
+                                  ID = NA)
+# prec site allocation
+setDT(avg_max_prec_5_df)
+setDT(avg_min_prec_5_df)
+setDT(avg_annual_total_5_df)
+setDT(cells_5)
+
+# Create prec_sites and assigning each observation to one cell
+prec_wet_sites_5 <- cells_5[avg_max_prec_5_df, on = .(lat_min <= y, lat_max >= y,
+                                                        lon_min <= x, lon_max >= x),
+                                .(average_wettest_month = i.average_wettest_month,
+                                  y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+prec_dry_sites_5 <- cells_5[avg_min_prec_5_df, on = .(lat_min <= y, lat_max >= y,
+                                                        lon_min <= x, lon_max >= x),
+                                .(average_driest_month = i.average_driest_month,
+                                  y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+prec_total_sites_5 <- cells_5[avg_annual_total_5_df, on = .(lat_min <= y, lat_max >= y,
+                                                              lon_min <= x, lon_max >= x),
+                                  .(average_annual_total_prec = i.average_annual_total_prec,
+                                    y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+# average wettest month per year per site - 10min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_10min_spatial_df), by = 12)
+
+# Initialize a matrix to store the highest values for each group
+all_row_data <- as.matrix(prec_10min_spatial_df)
+highest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  max_values <- apply(all_row_data[, start_col:end_col], 1, max)
+  
+  # Store the highest values in the matrix
+  highest_values_matrix[, i] <- max_values
+}
+
+# make dataframe 
+highest_values_df <- as.data.frame(highest_values_matrix)
+
+# Calculate the average wettest month for each row
+highest_values_df$average_wettest_month <- rowMeans(highest_values_df, na.rm = TRUE)
+
+# make dataframe with average wettest month and coordinates
+avg_max_prec_10_df <- data.frame(x = prec_10min_spatial_df$x, y = prec_10min_spatial_df$y,
+                                average_wettest_month = highest_values_df$average_wettest_month,
+                                ID = NA)
+
+# average driest month per year per site - 10min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_10min_spatial_df), by = 12)
+
+# Initialize a matrix to store the lowest values for each group
+all_row_data <- as.matrix(prec_10min_spatial_df)
+lowest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the lowest value in each group of 12 columns for all rows
+  min_values <- apply(all_row_data[, start_col:end_col], 1, min)
+  
+  # Store the lowest values in the matrix
+  lowest_values_matrix[, i] <- min_values
+}
+
+# make dataframe 
+lowest_values_df <- as.data.frame(lowest_values_matrix)
+
+# Calculate the average driest month for each row
+lowest_values_df$average_driest_month <- rowMeans(lowest_values_df, na.rm = TRUE)
+
+# make dataframe with average driest month and coordinates
+avg_min_prec_10_df <- data.frame(x = prec_10min_spatial_df$x, y = prec_10min_spatial_df$y,
+                                average_driest_month = lowest_values_df$average_driest_month,
+                                ID = NA)
+
+# total precipitation per year per site - 10min
+# group my columns per year
+group_indices <- seq(3, ncol(prec_10min_spatial_df), by = 12)
+
+# Initialize a matrix to store the sum for each group (annual total precipitation)
+all_row_data <- as.matrix(prec_10min_spatial_df)
+annual_total_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the total value for each group of 12 columns for all rows
+  annual_total <- apply(all_row_data[, start_col:end_col], 1, sum)
+  
+  # Store the sum in the matrix
+  annual_total_matrix[, i] <- annual_total
+}
+
+# make dataframe 
+annual_total_df <- as.data.frame(annual_total_matrix)
+
+# Calculate the average annual total precipitation for each row
+annual_total_df$average_annual_total_prec <- rowMeans(annual_total_df, na.rm = TRUE)
+
+# make dataframe with average wettest month and coordinates
+avg_annual_total_10_df <- data.frame(x = prec_10min_spatial_df$x, y = prec_10min_spatial_df$y,
+                                    average_annual_total_prec = annual_total_df$average_annual_total_prec,
+                                    ID = NA)
+# prec site allocation
+setDT(avg_max_prec_10_df)
+setDT(avg_min_prec_10_df)
+setDT(avg_annual_total_10_df)
+setDT(cells_10)
+
+# Create prec_sites and assigning each observation to one cell
+prec_wet_sites_10 <- cells_10[avg_max_prec_10_df, on = .(lat_min <= y, lat_max >= y,
+                                                      lon_min <= x, lon_max >= x),
+                            .(average_wettest_month = i.average_wettest_month,
+                              y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+prec_dry_sites_10 <- cells_10[avg_min_prec_10_df, on = .(lat_min <= y, lat_max >= y,
+                                                      lon_min <= x, lon_max >= x),
+                            .(average_driest_month = i.average_driest_month,
+                              y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+prec_total_sites_10 <- cells_10[avg_annual_total_10_df, on = .(lat_min <= y, lat_max >= y,
+                                                            lon_min <= x, lon_max >= x),
+                              .(average_annual_total_prec = i.average_annual_total_prec,
+                                y, x, cell_ID = x.cell_ID), mult = "first"] 
+
