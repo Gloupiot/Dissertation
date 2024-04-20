@@ -30,6 +30,157 @@ cells_10$lon_min <- cells_10$x - 0.1666667/2
 cells_10$lon_max <- cells_10$x + 0.1666667/2
 cells_10$cell_ID <- seq_len(nrow(cells_10))
 
+#ASSIGN BUTTERFLY OCCURENCES TO SITES
+# Check for missing values
+missing_values <- is.na(butterflies$decimalLatitude) | is.na(butterflies$decimalLongitude)
+
+# Remove rows with missing values
+butterflies_clean <- butterflies[!missing_values, ]
+butterflies <- butterflies_clean
+
+# bf-sites 2.5min
+# Convert dataframes to data.tables
+setDT(butterflies)
+setDT(cells_2_5)
+
+# Create bf_sites_raw and assigning each bf observation to 1 cell
+bf_sites_raw <- cells_2_5[butterflies, on = .(lat_min <= decimalLatitude, lat_max >= decimalLatitude,
+                                          lon_min <= decimalLongitude, lon_max >= decimalLongitude),
+                      .(species = i.species, decimalLatitude, decimalLongitude, cell_ID = x.cell_ID), mult = "first"]
+
+
+# keep 1 individual per species per site
+bf_sites_unique <- bf_sites_raw %>%
+  distinct(species, cell_ID, .keep_all = TRUE)
+
+# dataframe that shows what species are present at every site and resulting richness
+# Create an empty dataframe with cell IDs and butterfly species
+sites_with_bf <- data.frame(cell_ID = unique(bf_sites_unique$cell_ID))
+num_rows_sites_with_bf <- nrow(sites_with_bf)
+bf_species <- Butterflyspecies$Bspecies
+bf_rich_sites_2_5 <- data.frame(matrix(ncol = length(bf_species), nrow = num_rows_sites_with_bf))
+colnames(bf_rich_sites_2_5) <- bf_species
+bf_rich_sites_2_5$cell_ID <- sites_with_bf$cell_ID
+
+# Add interaction to the dataframe
+library(data.table)
+setDT(bf_rich_sites_2_5)
+setDT(bf_sites_unique)
+
+# Loop through each row in bf_sites_unique and update bf_rich_sites_2_5
+for (i in 1:nrow(bf_sites_unique)) {
+  cell_id <- bf_sites_unique[i, cell_ID]
+  species <- bf_sites_unique[i, species]
+  
+  # Check if the species column exists in bf_rich_sites
+  if (species %in% colnames(bf_rich_sites_2_5)) {
+    # Update the corresponding cell in bf_rich_sites with 1
+    bf_rich_sites_2_5[cell_ID == cell_id, (species) := 1]
+  }
+}
+
+# Fill missing values with 0
+bf_rich_sites_2_5[is.na(bf_rich_sites_2_5)] <- 0
+
+# Add richness count per cell_ID
+bf_rich_sites_2_5$richness <- apply(bf_rich_sites_2_5, 1, function(x) {sum(x == 1)})
+
+# bf-sites 5min
+# Convert dataframes to data.tables
+setDT(butterflies)
+setDT(cells_5)
+
+# Create bf_sites_raw and assigning each bf observation to 1 cell
+bf_sites_raw <- cells_5[butterflies, on = .(lat_min <= decimalLatitude, lat_max >= decimalLatitude,
+                                              lon_min <= decimalLongitude, lon_max >= decimalLongitude),
+                          .(species = i.species, decimalLatitude, decimalLongitude, cell_ID = x.cell_ID), mult = "first"]
+
+
+# keep 1 individual per species per site
+bf_sites_unique <- bf_sites_raw %>%
+  distinct(species, cell_ID, .keep_all = TRUE)
+
+# dataframe that shows what species are present at every site and resulting richness
+# Create an empty dataframe with cell IDs and butterfly species
+sites_with_bf <- data.frame(cell_ID = unique(bf_sites_unique$cell_ID))
+num_rows_sites_with_bf <- nrow(sites_with_bf)
+bf_species <- Butterflyspecies$Bspecies
+bf_rich_sites_5 <- data.frame(matrix(ncol = length(bf_species), nrow = num_rows_sites_with_bf))
+colnames(bf_rich_sites_5) <- bf_species
+bf_rich_sites_5$cell_ID <- sites_with_bf$cell_ID
+
+# Add interaction to the dataframe
+library(data.table)
+setDT(bf_rich_sites_5)
+setDT(bf_sites_unique)
+
+# Loop through each row in bf_sites_unique and update bf_rich_sites
+for (i in 1:nrow(bf_sites_unique)) {
+  cell_id <- bf_sites_unique[i, cell_ID]
+  species <- bf_sites_unique[i, species]
+  
+  # Check if the species column exists in bf_rich_sites
+  if (species %in% colnames(bf_rich_sites_5)) {
+    # Update the corresponding cell in bf_rich_sites with 1
+    bf_rich_sites_5[cell_ID == cell_id, (species) := 1]
+  }
+}
+
+# Fill missing values with 0
+bf_rich_sites_5[is.na(bf_rich_sites_5)] <- 0
+
+# Add richness count per cell_ID
+bf_rich_sites_5$richness <- apply(bf_rich_sites_5, 1, function(x) {sum(x == 1)})
+
+# bf-sites 10min
+# Convert dataframes to data.tables
+setDT(butterflies)
+setDT(cells_10)
+
+# Create bf_sites_raw and assigning each bf observation to 1 cell
+bf_sites_raw <- cells_10[butterflies, on = .(lat_min <= decimalLatitude, lat_max >= decimalLatitude,
+                                            lon_min <= decimalLongitude, lon_max >= decimalLongitude),
+                        .(species = i.species, decimalLatitude, decimalLongitude, cell_ID = x.cell_ID), mult = "first"]
+
+
+# keep 1 individual per species per site
+bf_sites_unique <- bf_sites_raw %>%
+  distinct(species, cell_ID, .keep_all = TRUE)
+
+# dataframe that shows what species are present at every site and resulting richness
+# Create an empty dataframe with cell IDs and butterfly species
+sites_with_bf <- data.frame(cell_ID = unique(bf_sites_unique$cell_ID))
+num_rows_sites_with_bf <- nrow(sites_with_bf)
+bf_species <- Butterflyspecies$Bspecies
+bf_rich_sites_10 <- data.frame(matrix(ncol = length(bf_species), nrow = num_rows_sites_with_bf))
+colnames(bf_rich_sites_10) <- bf_species
+bf_rich_sites_10$cell_ID <- sites_with_bf$cell_ID
+
+# Add interaction to the dataframe
+library(data.table)
+setDT(bf_rich_sites_10)
+setDT(bf_sites_unique)
+
+# Loop through each row in bf_sites_unique and update bf_rich_sites
+for (i in 1:nrow(bf_sites_unique)) {
+  cell_id <- bf_sites_unique[i, cell_ID]
+  species <- bf_sites_unique[i, species]
+  
+  # Check if the species column exists in bf_rich_sites
+  if (species %in% colnames(bf_rich_sites_10)) {
+    # Update the corresponding cell in bf_rich_sites with 1
+    bf_rich_sites_10[cell_ID == cell_id, (species) := 1]
+  }
+}
+
+# Fill missing values with 0
+bf_rich_sites_10[is.na(bf_rich_sites_10)] <- 0
+
+# Add richness count per cell_ID
+bf_rich_sites_10$richness <- apply(bf_rich_sites_10, 1, function(x) {sum(x == 1)})
+
+
+
 #EXTRACT AVERAGE ANNUAL MINIMUM, MAXIMUM, TOTAL Prec AND ASSIGN DATA TO SITES (3 resolutions) - applies for past and future data
 # average wettest month per year per site - 2.5min
 # group my columns per year
