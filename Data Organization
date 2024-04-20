@@ -180,6 +180,54 @@ bf_rich_sites_10[is.na(bf_rich_sites_10)] <- 0
 bf_rich_sites_10$richness <- apply(bf_rich_sites_10, 1, function(x) {sum(x == 1)})
 
 
+#ASSIGN BUTTERFLY OCCURENCES TO SITES
+# butterfly species and site allocation
+# Check for missing values
+missing_values <- is.na(hostplants$decimalLatitude) | is.na(hostplants$decimalLongitude)
+
+# Remove rows with missing values
+hostplants_clean <- hostplants[!missing_values, ]
+hostplants <- hostplants_clean 
+
+# Convert dataframes to data.tables
+setDT(hostplants)
+setDT(cells)
+
+# Create hp_sites_raw trying to get rid of duplicates
+hp_sites_raw <- cells[hostplants, on = .(lat_min <= decimalLatitude, lat_max >= decimalLatitude,
+                                          lon_min <= decimalLongitude, lon_max >= decimalLongitude),
+                      .(species = i.species, decimalLatitude, decimalLongitude, cell_ID = x.ID), mult = "first"]
+
+# create hp_sites, interactions 1/0 between hp and sites
+# Create an empty dataframe with cell IDs and hostplant species
+hp_sites <- data.frame(cell_ID = unique(hp_sites_raw$cell_ID))
+num_rows_sites_with_hp <- nrow(hp_sites_raw)
+hostplant_names <- names(diet_01)
+hp_sites <- data.frame(matrix(ncol = length(hostplant_names), nrow = num_rows_sites_with_hp))
+colnames(hp_sites) <- hostplant_names
+hp_sites$cell_ID <- hp_sites_raw$cell_ID
+
+# Add interaction to the dataframe
+library(data.table)
+setDT(hp_sites)
+setDT(hp_sites_raw)
+
+# Loop through each row in bf_sites_unique and update bf_rich_sites
+for (i in 1:nrow(hp_sites_raw)) {
+  cell_id <- hp_sites_raw[i, cell_ID]
+  species <- hp_sites_raw[i, species]
+  
+  # Check if the species column exists in bf_rich_sites
+  if (species %in% colnames(hp_sites)) {
+    # Update the corresponding cell in bf_rich_sites with 1
+    hp_sites[cell_ID == cell_id, (species) := 1]
+  }
+}
+
+
+# Fill missing values with 0
+hp_sites[is.na(hp_sites)] <- 0
+
 
 #EXTRACT AVERAGE ANNUAL MINIMUM, MAXIMUM, TOTAL Prec AND ASSIGN DATA TO SITES (3 resolutions) - applies for past and future data
 # average wettest month per year per site - 2.5min
