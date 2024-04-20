@@ -3,6 +3,7 @@ library(dplyr)
 library(stringr)
 library(raster)
 library(sp)
+library(data.table)
 
 #DOWNLOAD GBIF BUTTERFLY AND HOSTPLANT OCCURENCE, KEEP ONLY RELEVANT COLUMNS AND BUTTERFLIES
 columns_to_keep <- c("gbifID", "year", "month", "day", "decimalLatitude", "decimalLongitude", "kingdom", "phylum", "class", "order", "family", "genus", "taxonRank", "taxonKey", "species")
@@ -587,3 +588,33 @@ new_headers <- gsub("\\.", "_", new_headers)
 
 # Rename the columns in the dataframe with the simplified header names
 colnames(tmax_10min_spatial_df) <- new_headers
+
+# elev-site 2.5min
+# elevation site allocation
+setDT(elevation_df_2_5)
+setDT(cells_2_5)
+
+# Create prec_sites trying to get rid of duplicates
+elev_sites_2_5 <- cells_2_5[elevation_df_2_5, on = .(lat_min <= y, lat_max >= y,
+                                            lon_min <= x, lon_max >= x),
+                    .(elevation = i.elevation, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# elev-site 5min
+# elevation site allocation
+setDT(elevation_df_5)
+setDT(cells_5)
+
+# Create prec_sites trying to get rid of duplicates
+elev_sites_5 <- cells_5[elevation_df_5, on = .(lat_min <= y, lat_max >= y,
+                                         lon_min <= x, lon_max >= x),
+                    .(elevation = i.elevation, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# elev-site 10min
+# elevation site allocation
+setDT(elevation_df_10)
+setDT(cells_10)
+
+# Create prec_sites trying to get rid of duplicates
+elev_sites_10 <- cells_10[elevation_df_10, on = .(lat_min <= y, lat_max >= y,
+                                           lon_min <= x, lon_max >= x),
+                      .(elevation = i.elevation, y, x, cell_ID = x.cell_ID), mult = "first"]
