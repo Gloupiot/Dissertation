@@ -1,4 +1,5 @@
 library(raster)
+library(dplyr)
 library(data.table)
 
 #CREATE SITES
@@ -29,7 +30,7 @@ cells_10$lon_min <- cells_10$x - 0.1666667/2
 cells_10$lon_max <- cells_10$x + 0.1666667/2
 cells_10$cell_ID <- seq_len(nrow(cells_10))
 
-#EXTRACT AVERAGE ANNUAL MINIMUM AND MAXIMUM AND ASSIGN DATA TO SITES (3 resolutions) - precipitation as an example
+#EXTRACT AVERAGE ANNUAL MINIMUM, MAXIMUM, TOTAL Prec AND ASSIGN DATA TO SITES (3 resolutions) - applies for past and future data
 # average wettest month per year per site - 2.5min
 # group my columns per year
 group_indices <- seq(3, ncol(prec_spatial_df), by = 12)
@@ -371,4 +372,324 @@ prec_total_sites_10 <- cells_10[avg_annual_total_10_df, on = .(lat_min <= y, lat
                                                             lon_min <= x, lon_max >= x),
                               .(average_annual_total_prec = i.average_annual_total_prec,
                                 y, x, cell_ID = x.cell_ID), mult = "first"] 
+
+
+#EXTRACT AVERAGE ANNUAL MINIMUM, MAXIMUM, MEAN Temp AND ASSIGN DATA TO SITES (3 resolutions) - applies for past and future data
+# average temp of coldest month per year per site - 2.5min
+# group my columns per year
+group_indices <- seq(3, ncol(tmin_spatial_2_5_df), by = 12)
+
+# Initialize a matrix to store the lowest values for each group
+all_row_data <- as.matrix(tmin_spatial_2_5_df)
+lowest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  min_values <- apply(all_row_data[, start_col:end_col], 1, min)
+  
+  # Store the highest values in the matrix
+  lowest_values_matrix[, i] <- min_values
+}
+
+# make dataframe 
+lowest_values_df <- as.data.frame(lowest_values_matrix)
+
+# Calculate the average coldest month for each row
+lowest_values_df$average_coldest_month <- rowMeans(lowest_values_df, na.rm = TRUE)
+
+# make dataframe with average coldest month and coordinates
+avg_tmin_df <- data.frame(x = tmin_spatial_2_5_df$x, y = tmin_spatial_2_5_df$y, 
+                          average_coldest_month = lowest_values_df$average_coldest_month)
+
+# tmin site allocation
+setDT(avg_tmin_df)
+setDT(cells_2_5)
+
+# Create tmin_sites trying to get rid of duplicates
+tmin_sites_2_5 <- cells_2_5[avg_tmin_df, on = .(lat_min <= y, lat_max >= y,
+                                        lon_min <= x, lon_max >= x),
+                    .(average_coldest_month = i.average_coldest_month, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# average temp of coldest month per year per site - 5min
+# group my columns per year
+group_indices <- seq(3, ncol(tmin_5min_spatial_df), by = 12)
+
+# Initialize a matrix to store the lowest values for each group
+all_row_data <- as.matrix(tmin_5min_spatial_df)
+lowest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  min_values <- apply(all_row_data[, start_col:end_col], 1, min)
+  
+  # Store the highest values in the matrix
+  lowest_values_matrix[, i] <- min_values
+}
+
+# make dataframe 
+lowest_values_df <- as.data.frame(lowest_values_matrix)
+
+# Calculate the average coldest month for each row
+lowest_values_df$average_coldest_month <- rowMeans(lowest_values_df, na.rm = TRUE)
+
+# make dataframe with average coldest month and coordinates
+avg_tmin_df <- data.frame(x = tmin_5min_spatial_df$x, y = tmin_5min_spatial_df$y, 
+                          average_coldest_month = lowest_values_df$average_coldest_month)
+
+# tmin site allocation
+setDT(avg_tmin_df)
+setDT(cells_5)
+
+# Create tmin_sites trying to get rid of duplicates
+tmin_sites_5 <- cells_5[avg_tmin_df, on = .(lat_min <= y, lat_max >= y,
+                                                lon_min <= x, lon_max >= x),
+                            .(average_coldest_month = i.average_coldest_month, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# average temp of coldest month per year per site - 10min
+# group my columns per year
+group_indices <- seq(3, ncol(tmin_10min_spatial_df), by = 12)
+
+# Initialize a matrix to store the lowest values for each group
+all_row_data <- as.matrix(tmin_10min_spatial_df)
+lowest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  min_values <- apply(all_row_data[, start_col:end_col], 1, min)
+  
+  # Store the highest values in the matrix
+  lowest_values_matrix[, i] <- min_values
+}
+
+# make dataframe 
+lowest_values_df <- as.data.frame(lowest_values_matrix)
+
+# Calculate the average coldest month for each row
+lowest_values_df$average_coldest_month <- rowMeans(lowest_values_df, na.rm = TRUE)
+
+# make dataframe with average coldest month and coordinates
+avg_tmin_df <- data.frame(x = tmin_10min_spatial_df$x, y = tmin_10min_spatial_df$y, 
+                          average_coldest_month = lowest_values_df$average_coldest_month)
+
+# tmin site allocation
+setDT(avg_tmin_df)
+setDT(cells_10)
+
+# Create tmin_sites trying to get rid of duplicates
+tmin_sites_10 <- cells_10[avg_tmin_df, on = .(lat_min <= y, lat_max >= y,
+                                            lon_min <= x, lon_max >= x),
+                        .(average_coldest_month = i.average_coldest_month, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# average temp of hottest month per year per site - 2.5 min
+# group my columns per year
+group_indices <- seq(3, ncol(tmax_spatial_2_5_df), by = 12)
+
+# Initialize a matrix to store the highest values for each group
+all_row_data <- as.matrix(tmax_spatial_2_5_df)
+highest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  max_values <- apply(all_row_data[, start_col:end_col], 1, max)
+  
+  # Store the highest values in the matrix
+  highest_values_matrix[, i] <- max_values
+}
+
+# make dataframe 
+highest_values_df <- as.data.frame(highest_values_matrix)
+
+# Calculate the average hottest month for each row
+highest_values_df$average_hottest_month <- rowMeans(highest_values_df, na.rm = TRUE)
+
+# make dataframe with average hottest month and coordinates
+avg_tmax_df <- data.frame(x = tmax_spatial_2_5_df$x, y = tmax_spatial_2_5_df$y, average_hottest_month = highest_values_df$average_hottest_month)
+
+# tmax site allocation
+setDT(avg_tmax_df)
+setDT(cells_2_5)
+
+# Create tmax_sites trying to get rid of duplicates
+tmax_sites_2_5 <- cells_2_5[avg_tmax_df, on = .(lat_min <= y, lat_max >= y,
+                                            lon_min <= x, lon_max >= x),
+                    .(average_hottest_month = i.average_hottest_month, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# average temp of hottest month per year per site - 5 min
+# group my columns per year
+group_indices <- seq(3, ncol(tmax_5min_spatial_df), by = 12)
+
+# Initialize a matrix to store the highest values for each group
+all_row_data <- as.matrix(tmax_5min_spatial_df)
+highest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  max_values <- apply(all_row_data[, start_col:end_col], 1, max)
+  
+  # Store the highest values in the matrix
+  highest_values_matrix[, i] <- max_values
+}
+
+# make dataframe 
+highest_values_df <- as.data.frame(highest_values_matrix)
+
+# Calculate the average hottest month for each row
+highest_values_df$average_hottest_month <- rowMeans(highest_values_df, na.rm = TRUE)
+
+# make dataframe with average hottest month and coordinates
+avg_tmax_df <- data.frame(x = tmax_5min_spatial_df$x, y = tmax_5min_spatial_df$y, average_hottest_month = highest_values_df$average_hottest_month)
+
+# tmax site allocation
+setDT(avg_tmax_df)
+setDT(cells_5)
+
+# Create tmax_sites trying to get rid of duplicates
+tmax_sites_5 <- cells_5[avg_tmax_df, on = .(lat_min <= y, lat_max >= y,
+                                            lon_min <= x, lon_max >= x),
+                        .(average_hottest_month = i.average_hottest_month, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+# average temp of hottest month per year per site - 10 min
+# group my columns per year
+group_indices <- seq(3, ncol(tmax_10min_spatial_df), by = 12)
+
+# Initialize a matrix to store the highest values for each group
+all_row_data <- as.matrix(tmax_10min_spatial_df)
+highest_values_matrix <- matrix(NA, nrow = nrow(all_row_data), ncol = length(group_indices))
+
+
+# Loop through each group of columns
+for (i in seq_along(group_indices)) {
+  start_col <- group_indices[i]
+  end_col <- min(start_col + 11, ncol(all_row_data))
+  
+  # Find the highest value in each group of 12 columns for all rows
+  max_values <- apply(all_row_data[, start_col:end_col], 1, max)
+  
+  # Store the highest values in the matrix
+  highest_values_matrix[, i] <- max_values
+}
+
+# make dataframe 
+highest_values_df <- as.data.frame(highest_values_matrix)
+
+# Calculate the average hottest month for each row
+highest_values_df$average_hottest_month <- rowMeans(highest_values_df, na.rm = TRUE)
+
+# make dataframe with average hottest month and coordinates
+avg_tmax_df <- data.frame(x = tmax_10min_spatial_df$x, y = tmax_10min_spatial_df$y, average_hottest_month = highest_values_df$average_hottest_month)
+
+# tmax site allocation
+setDT(avg_tmax_df)
+setDT(cells_10)
+
+# Create tmax_sites trying to get rid of duplicates
+tmax_sites_10 <- cells_10[avg_tmax_df, on = .(lat_min <= y, lat_max >= y,
+                                            lon_min <= x, lon_max >= x),
+                        .(average_hottest_month = i.average_hottest_month, y, x, cell_ID = x.cell_ID), mult = "first"]
+# average temp per year per site - 2.5min
+## Rename the columns in tmin_spatial_2_5_df
+tmin_spatial_2_5_df_renamed <- tmin_spatial_2_5_df %>%
+  rename_at(vars(-c(1, 2)), ~paste0("tmin_", .))
+
+## Rename the columns in tmax_spatial_2_5_df
+tmax_spatial_2_5_df_renamed <- tmax_spatial_2_5_df %>%
+  rename_at(vars(-c(1, 2)), ~paste0("tmax_", .))
+
+## Combine the dataframes
+combined_df <- cbind(tmin_spatial_2_5_df_renamed, tmax_spatial_2_5_df_renamed[, -c(1, 2)])
+
+## Calculate the average of the minimum and maximum temperatures for each site
+avg_sites_2_5 <- combined_df %>%
+  mutate(avg_temp = apply(combined_df[, -c(1, 2)], 1, mean)) %>%
+  select(x, y, avg_temp)
+
+# 2.5min avg_temp site allocation
+setDT(avg_sites_2_5)
+setDT(cells_2_5)
+
+# Create avg_sites_2_5 trying to get rid of duplicates
+avg_sites_2_5 <- cells_2_5[avg_sites_2_5, on = .(lat_min <= y, lat_max >= y,
+                                                lon_min <= x, lon_max >= x),
+                            .(avg_temp = i.avg_temp, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+
+# average temp per year per site - 5min
+## Rename the columns in tmin_5min_spatial_df
+tmin_spatial_5_df_renamed <- tmin_5min_spatial_df %>%
+  rename_at(vars(-c(1, 2)), ~paste0("tmin_", .))
+
+## Rename the columns in tmax_5min_spatial_df
+tmax_spatial_5_df_renamed <- tmax_5min_spatial_df %>%
+  rename_at(vars(-c(1, 2)), ~paste0("tmax_", .))
+
+## Combine the dataframes
+combined_df <- cbind(tmin_spatial_5_df_renamed, tmax_spatial_5_df_renamed[, -c(1, 2)])
+
+## Calculate the average of the minimum and maximum temperatures for each site
+avg_sites_5 <- combined_df %>%
+  mutate(avg_temp = apply(combined_df[, -c(1, 2)], 1, mean)) %>%
+  select(x, y, avg_temp)
+
+# 5min avg_temp site allocation
+setDT(avg_sites_5)
+setDT(cells_5)
+
+# Create avg_sites_2_5 trying to get rid of duplicates
+avg_sites_5 <- cells_5[avg_sites_5, on = .(lat_min <= y, lat_max >= y,
+                                                 lon_min <= x, lon_max >= x),
+                           .(avg_temp = i.avg_temp, y, x, cell_ID = x.cell_ID), mult = "first"]
+
+
+
+# average temp per year per site - 10min
+## Rename the columns in tmin_10min_spatial_df
+tmin_spatial_10_df_renamed <- tmin_10min_spatial_df %>%
+  rename_at(vars(-c(1, 2)), ~paste0("tmin_", .))
+
+## Rename the columns in tmax_10min_spatial_df
+tmax_spatial_10_df_renamed <- tmax_10min_spatial_df %>%
+  rename_at(vars(-c(1, 2)), ~paste0("tmax_", .))
+
+## Combine the dataframes
+combined_df <- cbind(tmin_spatial_10_df_renamed, tmax_spatial_10_df_renamed[, -c(1, 2)])
+
+## Calculate the average of the minimum and maximum temperatures for each site
+avg_sites_10 <- combined_df %>%
+  mutate(avg_temp = apply(combined_df[, -c(1, 2)], 1, mean)) %>%
+  select(x, y, avg_temp)
+
+# 10min avg_temp site allocation
+setDT(avg_sites_10)
+setDT(cells_10)
+
+# Create avg_sites_10 trying to get rid of duplicates
+avg_sites_10 <- cells_10[avg_sites_10, on = .(lat_min <= y, lat_max >= y,
+                                           lon_min <= x, lon_max >= x),
+                       .(avg_temp = i.avg_temp, y, x, cell_ID = x.cell_ID), mult = "first"]
+
 
