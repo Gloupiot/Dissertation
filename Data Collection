@@ -1,4 +1,9 @@
-butterflies <- fread("/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/GBIF/ALL butterflies/0008110-240314170635999.zip",
+#DOWNLOAD GBIF BUTTERFLY AND HOSTPLANT OCCURENCE, KEEP ONLY RELEVANT COLUMNS AND BUTTERFLIES
+columns_to_keep <- c("gbifID", "year", "month", "day", "decimalLatitude", "decimalLongitude", "kingdom", "phylum", "class", "order", "family", "genus", "taxonRank", "taxonKey", "species")
+
+butterflies <- fread("path_to_file",
+                    sep = "\t", select = c(columns_to_keep, NA, NA))
+hostplants <- fread("path_to_file",
                     sep = "\t", select = c(columns_to_keep, NA, NA))
 
 butterflies <- butterflies[!(butterflies$species %in% c('Vanessa cardui', 'Colias croceus')), ]
