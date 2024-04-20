@@ -261,3 +261,851 @@ model_results_resc_int <- data.frame(
   coef = coef_table_resc_int[, "Estimate"],
   se = coef_table_resc_int[, "Std. Error"]
 )
+
+
+# get uk limitations 
+uk.poly <- gisco_get_countries(country = "GBR")
+
+# current precipitation
+current_min_prec <- rasterFromXYZ(prec_dry_sites_10[,c(3,2,1)])
+current_min_prec <- mask(current_min_prec,uk.poly)
+current_max_prec <- rasterFromXYZ(prec_wet_sites_10[,c(3,2,1)])
+current_max_prec <- mask(current_max_prec,uk.poly)
+current_total_prec <- rasterFromXYZ(prec_total_sites_10[,c(3,2,1)])
+current_total_prec <- mask(current_total_prec,uk.poly)
+
+plot(current_min_prec, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(20,140),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+# normal scale
+plot(current_max_prec, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(80, 450),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(current_max_prec, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(50,450),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+plot(current_total_prec, col = rev(colorRampPalette(mako(100))(100)),
+     zlim=c(500,3000),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+# current temperature
+current_min_temp <- rasterFromXYZ(tmin_sites_10[,c(3,2,1)])
+current_min_temp <- mask(current_min_temp,uk.poly)
+current_max_temp <- rasterFromXYZ(tmax_sites_10[,c(3,2,1)])
+current_max_temp <- mask(current_max_temp,uk.poly)
+current_avg_temp <- rasterFromXYZ(avg_sites_10[,c(3,2,1)])
+current_avg_temp <- mask(current_avg_temp,uk.poly)
+
+# normal scale
+plot(current_min_temp, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(-4, 4),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(current_min_temp, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(-4,9),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+# normal scale
+plot(current_max_temp, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(14, 25),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(current_max_temp, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(10,35),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+plot(current_avg_temp, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(4,21),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+# future precipitation - ssp126
+future_min_prec_126 <- rasterFromXYZ(avg_min_prec_10_df_ssp126[,c(1,2,3)])
+future_min_prec_126 <- mask(future_min_prec,uk.poly)
+future_max_prec_126 <- rasterFromXYZ(avg_max_prec_10_df_ssp126[,c(1,2,3)])
+future_max_prec_126 <- mask(future_max_prec,uk.poly)
+future_total_prec_126 <- rasterFromXYZ(avg_annual_total_10_df_ssp126[,c(1,2,3)])
+future_total_prec_126 <- mask(future_total_prec,uk.poly)
+
+plot(future_min_prec_126, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(20,140),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+plot(future_max_prec_126, col = rev(colorRampPalette(mako(100))(100)),
+     zlim=c(50,450),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+plot(future_total_prec_126, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(500,3000),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+# future temperature - ssp126
+future_min_temp_126 <- rasterFromXYZ(future_tmin_sites_ssp126[,c(3,2,1)])
+future_min_temp_126 <- mask(future_min_temp_126,uk.poly)
+future_max_temp_126 <- rasterFromXYZ(future_tmax_sites_ssp126[,c(3,2,1)])
+future_max_temp_126 <- mask(future_max_temp_126,uk.poly)
+future_avg_temp_126 <- rasterFromXYZ(avg_sites_10_ssp126[,c(3,2,1)])
+future_avg_temp_126 <- mask(future_avg_temp_126,uk.poly)
+
+plot(future_min_temp_126, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(-4,9),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+plot(future_max_temp_126, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(10,35),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+plot(future_avg_temp_126, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(4,21),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+# future precipitation - ssp585
+future_min_prec_585 <- rasterFromXYZ(avg_min_prec_10_df_ssp585[,c(1,2,3)])
+future_min_prec_585 <- mask(future_min_prec_585,uk.poly)
+future_max_prec_585 <- rasterFromXYZ(avg_max_prec_10_df_ssp585[,c(1,2,3)])
+future_max_prec_585 <- mask(future_max_prec_585,uk.poly)
+future_total_prec_585 <- rasterFromXYZ(avg_annual_total_10_df_ssp585[,c(1,2,3)])
+future_total_prec_585 <- mask(future_total_prec_585,uk.poly)
+
+plot(future_min_prec_585, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(20,140),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+plot(future_max_prec_585, col = rev(colorRampPalette(mako(100))(100)),
+     zlim=c(50,450),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+plot(future_total_prec_585, col = rev(colorRampPalette(mako(100))(100)),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(500,3000),
+     legend.args=list(text='Precipitation (mm)', side=4, font=1, line=3, cex=1))
+
+# future temperature - ssp585
+future_min_temp_585 <- rasterFromXYZ(future_tmin_sites_ssp585[,c(3,2,1)])
+future_min_temp_585 <- mask(future_min_temp_585,uk.poly)
+future_max_temp_585 <- rasterFromXYZ(future_tmax_sites_ssp585[,c(3,2,1)])
+future_max_temp_585 <- mask(future_max_temp_585,uk.poly)
+future_avg_temp_585 <- rasterFromXYZ(avg_sites_10_ssp585[,c(3,2,1)])
+future_avg_temp_585 <- mask(future_avg_temp_585,uk.poly)
+
+plot(future_min_temp_585, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(-4,9),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+plot(future_max_temp_585, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(10,35),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+plot(future_avg_temp_585, col = colorRampPalette(tim.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(4,21),
+     legend.args=list(text='Temperature (C°)', side=4, font=1, line=3, cex=1))
+
+# elevation
+elevation <- rasterFromXYZ(elev_sites_10[,c(3,2,1)])
+elevation <- mask(elevation,uk.poly)
+
+plot(elevation, col = colorRampPalette(terrain.colors(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Elevation (m)', side=4, font=1, line=3, cex=1))
+
+# current butterfly richness
+butterfly <- rasterFromXYZ(sites_cond_10_filter[,c(2,3,11)])
+butterfly <- mask(butterfly,uk.poly)
+
+# normal scale
+plot(butterfly, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(0, 38),
+     legend.args=list(text='Current Richness', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(butterfly, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(1,250),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# current interactions richness
+interactions <- rasterFromXYZ(sites_cond_10_int_filter[,c(2,3,11)])
+interactions <- mask(interactions,uk.poly)
+
+# normal scale
+plot(interactions, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(0, 31),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(interactions, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(0,250),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+
+ext <- extent(butterfly)
+
+# future butterfly richness - ssp126
+
+butterfly_ssp126 <- rasterFromXYZ(sites_cond_ssp126_butterflies[,c(2,3,11)])
+butterfly_ssp126 <- crop(butterfly_ssp126, ext)
+butterfly_ssp126 <- mask(butterfly_ssp126,uk.poly)
+
+# normal scale
+plot(butterfly_ssp126, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(10,75),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(butterfly_ssp126, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(1,250),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# future interactions richness - sspp126
+interactions_ssp126 <- rasterFromXYZ(sites_cond_ssp126_interactions[,c(2,3,11)])
+interactions_ssp126 <- crop(interactions_ssp126, ext)
+interactions_ssp126 <- mask(interactions_ssp126,uk.poly)
+
+# normal scale
+plot(interactions_ssp126, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(8, 60),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(interactions_ssp126, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(0,250),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# future butterfly richness - ssp585
+butterfly_ssp585 <- rasterFromXYZ(sites_cond_ssp585_butterflies[,c(2,3,11)])
+butterfly_ssp585 <- crop(butterfly_ssp585, ext)
+butterfly_ssp585 <- mask(butterfly_ssp585,uk.poly)
+
+# normal scale
+plot(butterfly_ssp585, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(30, 240),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(butterfly_ssp585, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(1,250),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# future interactions richness - sspp585
+interactions_ssp585 <- rasterFromXYZ(sites_cond_ssp585_interactions[,c(2,3,11)])
+interactions_ssp585 <- crop(interactions_ssp585, ext)
+interactions_ssp585 <- mask(interactions_ssp585,uk.poly)
+
+# normal scale
+plot(interactions_ssp585, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(20, 220),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+# comparison scale
+plot(interactions_ssp585, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     zlim=c(0,250),
+     legend.args=list(text='Richness', side=4, font=1, line=3, cex=1))
+
+
+# comparing all  - butterflies
+hist(sites_cond_10_filter$richness)
+hist(sites_cond_ssp126_butterflies_filter$richness)
+hist(sites_cond_ssp585_butterflies_filter$richness)
+
+mean(sites_cond_10_filter$richness)
+mean(sites_cond_ssp126_butterflies_filter$richness)
+mean(sites_cond_ssp585_butterflies_filter$richness)
+
+range(sites_cond_10_filter$richness)
+range(sites_cond_ssp126_butterflies_filter$richness)
+range(sites_cond_ssp585_butterflies_filter$richness)
+
+
+# calculating loss or gain of highly diverse communities, medium diverse communities, low diverse communities
+library(dplyr)
+
+# Current diversity status
+current_diversity_status <- sites_cond_10_filter %>%
+  mutate(diversity_status = cut(richness, 
+                                breaks = c(-Inf, quantile(richness, 0.33), 
+                                           quantile(richness, 0.67), Inf),
+                                labels = c('low', 'medium', 'high')))
+
+# Future diversity status - ssp 126
+diversity_status_ssp126 <- sites_cond_ssp126_butterflies_filter %>%
+  mutate(diversity_status = cut(richness,
+                                breaks = c(-Inf, quantile(richness, 0.33),
+                                           quantile(richness, 0.67), Inf),
+                                labels = c('low', 'medium', 'high')))
+
+# Future diversity status - ssp585
+diversity_status_ssp585 <- sites_cond_ssp585_butterflies_filter %>%
+  mutate(diversity_status = cut(richness,
+                                breaks = c(-Inf, quantile(richness, 0.33),
+                                           quantile(richness, 0.67), Inf),
+                                labels = c('low', 'medium', 'high')))
+
+# Compare diversity status between current and future
+comparison_df <- current_diversity_status %>%
+  left_join(diversity_status_ssp126, by = 'site', suffix = c('_current', '_future_126')) %>%
+  left_join(diversity_status_ssp585, by = 'site') %>%
+  rename(diversity_status_future_585 = diversity_status)%>%
+  dplyr::select(site, x, y, diversity_status_current, diversity_status_future_126, diversity_status_future_585)
+
+
+table(comparison_df$diversity_status_current) #low = 449,  medium = 315,  high = 336
+table(comparison_df$diversity_status_future_126)  #low = 442,  medium = 329,  high = 329
+table(comparison_df$diversity_status_future_585)  #low = 419,  medium = 345,  high = 336
+
+site_change_present_126_low <- 442/449*100 #98.44098      -1.56%
+site_change_present_585_low <- 419/449*100 #93.31849      -6.68%
+site_change_126_585_low <- 419/442*100 #94.79638          -5.20%
+
+site_change_present_126_medium <- 329/315*100 #104.4444   +4.44%
+site_change_present_585_medium <- 345/315*100 #109.5238   +9.52%
+site_change_126_585_medium <- 345/329*100 #104.8632       +4.86%
+
+site_change_present_126_high <- 329/336*100 #97.91667     -2.08%
+site_change_present_585_high <- 336/336*100 #100          -+0%
+site_change_126_585_high <- 336/329*100 #102.1277         -2.13%
+
+#each site = 19 km2, so loss and gain can be calculated in terms of area
+
+current_diversity_status <- plot(comparison_df$x,comparison_df$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[comparison_df$diversity_status_current],
+     pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
+ssp126_diversity_status <- plot(comparison_df$x,comparison_df$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[comparison_df$diversity_status_future_126],
+                                 pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
+ssp585_diversity_status <- plot(comparison_df$x,comparison_df$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[comparison_df$diversity_status_future_585],
+                                pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
+
+
+# Butterflies
+par(mfrow=c(2,3),oma=c(5,5,5,5))
+
+plot(butterfly_ssp126-butterfly,main="SSP126-Present",col=colorRampPalette(viridis(100))(100))
+plot(butterfly_ssp585-butterfly,main="SSP585-Present",col=colorRampPalette(viridis(100))(100))
+plot(butterfly_ssp585-butterfly_ssp126,main="SSP585-SSP126",col=colorRampPalette(viridis(100))(100))
+
+plot(butterfly_ssp126 - butterfly, main = "SSP126-Present",
+     col = colorRampPalette(c("darkred", "brown1", "lightgreen", "darkgreen"))(100))
+
+plot(butterfly_ssp585 - butterfly, main = "SSP585-Present",
+     col = colorRampPalette(c("darkred", "brown1", "lightgreen", "darkgreen"))(100))
+
+plot(butterfly_ssp585 - butterfly_ssp126, main = "SSP585-SSP126",
+     col = colorRampPalette(c("darkred", "brown1", "lightgreen", "darkgreen"))(100))
+
+
+
+# Calculate the difference between the two rasters
+diff_raster_present_ssp126 <- butterfly_ssp126 - butterfly
+
+# Create the custom color mapping
+bins <- c(-5, 0, 50, 100, 150, 200, 250)
+colors <- c( "brown1", "olivedrab1","olivedrab2", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_raster_present_ssp126, col = colors,
+     breaks = bins,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in richness', side=4, font=1, line=3, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+
+# Calculate the difference between the two rasters
+diff_raster_present_ssp585 <- butterfly_ssp585 - butterfly
+
+# Create the custom color mapping
+bins <- c(-5, 0, 50, 100, 150, 200, 250)
+colors <- c( "brown1", "olivedrab1","olivedrab2", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_raster_present_ssp585, col = colors,
+     breaks = bins,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in richness', side=4, font=1, line=3, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+# Calculate the difference between the two rasters
+diff_raster_ssp126_ssp585 <- butterfly_ssp585 - butterfly_ssp126
+
+# Create the custom color mapping
+bins <- c(-5, 0, 50, 100, 150, 200, 250)
+colors <- c( "brown1", "olivedrab1","olivedrab2", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_raster_ssp126_ssp585, col = colors,
+     breaks = bins,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in richness', side=4, font=1, line=3, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+
+# comparing all - interactions
+
+hist(sites_cond_10_int_filter$richness)
+hist(sites_cond_ssp126_interactions_filter$richness)
+hist(sites_cond_ssp585_interactions_filter$richness)
+
+mean(sites_cond_10_int_filter$richness)
+mean(sites_cond_ssp126_interactions_filter$richness)
+mean(sites_cond_ssp585_interactions_filter$richness)
+
+range(sites_cond_10_int_filter$richness)
+range(sites_cond_ssp126_interactions_filter$richness)
+range(sites_cond_ssp585_interactions_filter$richness)
+
+# calculating loss or gain of highly diverse communities, medium diverse communities, low diverse communities
+library(dplyr)
+
+# Current diversity status
+current_diversity_status_int <- sites_cond_10_int_filter %>%
+  mutate(diversity_status = cut(richness, 
+                                breaks = c(-Inf, quantile(richness, 0.33), 
+                                           quantile(richness, 0.67), Inf),
+                                labels = c('low', 'medium', 'high')))
+
+# Future diversity status - ssp 126
+diversity_status_ssp126_int <- sites_cond_ssp126_interactions_filter %>%
+  mutate(diversity_status = cut(richness,
+                                breaks = c(-Inf, quantile(richness, 0.33),
+                                           quantile(richness, 0.67), Inf),
+                                labels = c('low', 'medium', 'high')))
+
+# Future diversity status - ssp585
+diversity_status_ssp585_int <- sites_cond_ssp585_interactions_filter %>%
+  mutate(diversity_status = cut(richness,
+                                breaks = c(-Inf, quantile(richness, 0.33),
+                                           quantile(richness, 0.67), Inf),
+                                labels = c('low', 'medium', 'high')))
+
+# Compare diversity status between current and future
+comparison_df_int <- current_diversity_status_int %>%
+  left_join(diversity_status_ssp126_int, by = 'site', suffix = c('_current', '_future_126')) %>%
+  left_join(diversity_status_ssp585_int, by = 'site') %>%
+  rename(diversity_status_future_585 = diversity_status)%>%
+  dplyr::select(site, x, y, diversity_status_current, diversity_status_future_126, diversity_status_future_585)
+
+
+table(comparison_df_int$diversity_status_current) #low = 363,  medium = 374,  high = 363
+table(comparison_df_int$diversity_status_future_126)  #low = 435,  medium = 336,  high = 329
+table(comparison_df_int$diversity_status_future_585)  #low = 417,  medium = 347,  high = 336
+
+site_change_present_126_low <- 435/363*100 #119.8347      +19.83%
+site_change_present_585_low <- 417/363*100 #114.876       +14.88%
+site_change_126_585_low <- 417/435*100 #95.86207          -4.14%
+
+site_change_present_126_medium <- 336/374*100 #89.83957   -10.16%
+site_change_present_585_medium <- 347/374*100 #92.78075   -7.22%
+site_change_126_585_medium <- 347/336*100 #103.2738       +3.27%
+
+site_change_present_126_high <- 329/363*100 #90.63361     -9.37%
+site_change_present_585_high <- 336/363*100 #92.56198     -7.44%
+site_change_126_585_high <- 336/329*100 #102.1277          -2.13%
+
+#each site = 19 km2, so loss and gain can be calculated in terms of area
+
+current_diversity_status_int <- plot(comparison_df_int$x,comparison_df_int$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[comparison_df_int$diversity_status_current],
+                                 pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
+ssp126_diversity_status_int <- plot(comparison_df_int$x,comparison_df_int$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[comparison_df_int$diversity_status_future_126],
+                                pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
+ssp585_diversity_status_int <- plot(comparison_df_int$x,comparison_df_int$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[comparison_df_int$diversity_status_future_585],
+                                pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
+
+# Calculate the difference between the two rasters
+diff_raster_present_ssp126_int <- interactions_ssp126 - interactions
+
+# Create the custom color mapping
+bins <- c(-5, 0, 50, 100, 150, 200, 250)
+colors <- c( "brown1", "olivedrab1","olivedrab2", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_raster_present_ssp126_int, col = colors,
+     breaks = c(-5, 0, 10, 20, 30, 40, 50),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in richness', side=4, font=1, line=3, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+
+# Calculate the difference between the two rasters
+diff_raster_present_ssp585_int <- interactions_ssp585 - interactions
+
+# Create the custom color mapping
+bins <- c(-5, 0, 50, 100, 150, 200, 250)
+colors <- c( "brown1", "olivedrab1","olivedrab2", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_raster_present_ssp585_int, col = colors,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in richness', side=4, font=1, line=3, cex=1),
+     breaks = bins,
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+# Calculate the difference between the two rasters
+diff_raster_ssp126_ssp585_int <- interactions_ssp585 - interactions_ssp126
+
+# Create the custom color mapping
+bins <- c(-5, 0, 50, 100, 150, 200, 250)
+colors <- c( "brown1", "olivedrab1","olivedrab2", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_raster_ssp126_ssp585_int, col = colors,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in richness', side=4, font=1, line=3, cex=1),
+     breaks = bins,
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+
+# comparing current int and but
+df1 <- sites_cond_10_filter
+df2 <- sites_cond_10_int_filter
+
+# Create a new column to identify the dataframe
+df1$dataframe <- "Butterfly species richness"
+df2$dataframe <- "Interactions richness"
+
+# Combine the two dataframes
+combined_df <- rbind(df1, df2)
+
+# Create the boxplot for but and int
+ggplot(combined_df, aes(x = dataframe, y = richness, fill = dataframe)) +
+  geom_boxplot(outlier.shape = 19, outlier.size = 3) +
+  labs(x = "", y = "Richness", fill = "") +
+  theme_classic()
+
+# Create the boxplot for butterflies
+butterflies_df_simple <- data.frame(
+  current = c(sites_cond_10_filter$richness, rep(0, 1503 - length(sites_cond_10_int_filter$richness))),
+  SSP126 = sites_cond_ssp126_butterflies_filter$richness,
+  SSP585 = sites_cond_ssp585_butterflies_filter$richness
+)
+
+
+butterflies_df_simple_long <- butterflies_df_simple %>%
+  pivot_longer(cols = c("current", "SSP126", "SSP585"), names_to = "variable", values_to = "value")
+
+# Create the boxplot
+ggplot(butterflies_df_simple_long, aes(x = variable, y = value, fill = variable)) +
+  geom_boxplot() +
+  labs(x = "", y = "Butterfly Species Richness", fill = "Variable") +
+  theme_classic()
+
+
+# Create the boxplot for butterflies
+interactions_df_simple <- data.frame(
+  current = c(sites_cond_10_int_filter$richness, rep(0, 1503 - length(sites_cond_10_int_filter$richness))),
+  SSP126 = sites_cond_ssp126_interactions_filter$richness,
+  SSP585 = sites_cond_ssp585_interactions_filter$richness
+)
+
+
+interactions_df_simple_long <- interactions_df_simple %>%
+  pivot_longer(cols = c("current", "SSP126", "SSP585"), names_to = "variable", values_to = "value")
+
+# Create the boxplot
+ggplot(interactions_df_simple_long, aes(x = variable, y = value, fill = variable)) +
+  geom_boxplot() +
+  labs(x = "", y = "Interactions Richness", fill = "Variable") +
+  theme_classic()
+
+
+# Create the boxplot for IFR
+IFR_df_simple <- data.frame(
+  current = IFR_df$current,
+  SSP126 = IFR_df$SSP126,
+  SSP585 = IFR_df$SSP585
+)
+
+IFR_df_simple_long <- IFR_df %>%
+  pivot_longer(cols = c("current", "SSP126", "SSP585"), names_to = "variable", values_to = "value")
+
+# Create the boxplot
+ggplot(IFR_df_simple_long, aes(x = variable, y = value, fill = variable)) +
+  geom_boxplot() +
+  labs(x = "", y = "IFR", fill = "Variable") +
+  theme_classic()
+
+
+# comparing future ssp126 int and but
+# Assuming 'sites_cond_10_filter' and 'sites_cond_10_int_filter' are your dataframes
+df1 <- sites_cond_ssp126_butterflies_filter
+df2 <- sites_cond_ssp126_interactions_filter
+
+# Create a new column to identify the dataframe
+df1$dataframe <- "Butterfly species richness"
+df2$dataframe <- "Interactions richness"
+
+# Combine the two dataframes
+combined_df <- rbind(df1, df2)
+
+
+# Create the boxplot
+ggplot(combined_df, aes(x = dataframe, y = richness, fill = dataframe)) +
+  geom_boxplot(outlier.shape = 19, outlier.size = 0.01) +
+  labs(x = "", y = "Richness", fill = "") +
+  theme_classic()
+
+
+# comparing future ssp585 int and but
+# Assuming 'sites_cond_10_filter' and 'sites_cond_10_int_filter' are your dataframes
+df1 <- sites_cond_ssp585_butterflies_filter
+df2 <- sites_cond_ssp585_interactions_filter
+
+# Create a new column to identify the dataframe
+df1$dataframe <- "Butterfly species richness"
+df2$dataframe <- "Interactions richness"
+
+# Combine the two dataframes
+combined_df <- rbind(df1, df2)
+
+
+# Create the boxplot
+ggplot(combined_df, aes(x = dataframe, y = richness, fill = dataframe)) +
+  geom_boxplot(outlier.shape = 19, outlier.size = 0.01) +
+  labs(x = "", y = "Richness", fill = "") +
+  theme_classic()
+
+
+# Map IFR
+# Calculate the ratio between the two rasters
+current_IFR <- interactions/butterfly
+
+# Create the custom color mapping
+bins <- c(0, 0.2, 0.4, 0.6, 0.8, 1)
+colors <- colorRampPalette(viridis(100))(100)
+
+# Plot the difference raster with the custom colors
+plot(current_IFR, col = colorRampPalette(viridis(100))(100),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='IFR', side=4, font=1, line=4, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+# Calculate the ratio between the two rasters
+SSP126_IFR <- interactions_ssp126/butterfly_ssp126
+
+# Plot the difference raster with the custom colors
+plot(SSP126_IFR, col = colors,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='IFR', side=4, font=1, line=4, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+# Calculate the ratio between the two rasters
+SSP585_IFR <- interactions_ssp585/butterfly_ssp585
+
+# Plot the difference raster with the custom colors
+plot(SSP585_IFR, col = colors,
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='IFR', side=4, font=1, line=4, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+
+# Map IFR
+# Calculate the difference between the two rasters
+diff_IFR_current_ssp126 <- SSP126_IFR-current_IFR
+
+# Create the custom color mapping
+bins <- c(0, 0.2, 0.4, 0.6, 0.8, 1)
+colors <- c(  "brown1", "olivedrab1", "chartreuse3", "chartreuse4", "darkgreen")
+
+# Plot the difference raster with the custom colors
+plot(diff_IFR_current_ssp126, col = colors,
+     breaks = c(-0.25, 0, 0.25, 0.50, 0.75, 1),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in IFR', side=4, font=1, line=4, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+# Calculate the ratio between the two rasters
+diff_IFR_current_ssp585 <- SSP585_IFR-current_IFR
+
+# Plot the difference raster with the custom colors
+plot(diff_IFR_current_ssp585, col = colors,
+     breaks = c(-0.25, 0, 0.25, 0.50, 0.75, 1),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in IFR', side=4, font=1, line=4, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+# Calculate the ratio between the two rasters
+diff_IFR_ssp126_ssp585 <- SSP585_IFR-SSP126_IFR
+
+# Plot the difference raster with the custom colors
+plot(diff_IFR_ssp126_ssp585, col = colors,
+     breaks = c(-0.25, 0, 0.25, 0.50, 0.75, 1),
+     xlab = 'Longitude', ylab= 'Latitude',
+     legend.args=list(text='Difference in IFR', side=4, font=1, line=4, cex=1),
+     legend = TRUE,
+     legend.width = 1,
+     legend.shrink = 0.8)
+
+
+# compare IFR
+
+current_IFR_df <- data.frame(
+  x = coordinates(current_IFR)[, 1],
+  y = coordinates(current_IFR)[, 2],
+  z = values(current_IFR)
+)
+
+SSP126_IFR_df <- data.frame(
+  x = coordinates(SSP126_IFR)[, 1],
+  y = coordinates(SSP126_IFR)[, 2],
+  z = values(SSP126_IFR)
+)
+
+SSP585_IFR_df <- data.frame(
+  x = coordinates(SSP585_IFR)[, 1],
+  y = coordinates(SSP585_IFR)[, 2],
+  z = values(SSP585_IFR)
+)
+
+# Checking the significance of difference in butterfly species richness
+Butterflies_allperiods_df <- data.frame(
+  richness_current = c(sites_cond_10_filter$richness, rep(0, 1503 - length(sites_cond_10_filter$richness))),
+  richness_ssp126 = sites_cond_ssp126_butterflies_filter$richness,
+  richness_ssp585 = sites_cond_ssp585_butterflies_filter$richness
+)
+
+# Check normality
+shapiro.test(Butterflies_allperiods_df$richness_current) # p-value < 2.2e-16
+shapiro.test(Butterflies_allperiods_df$richness_ssp126) # p-value < 2.2e-16
+shapiro.test(Butterflies_allperiods_df$richness_ssp585) # p-value < 2.2e-16
+# data does not meet the assumption of normality
+
+# Check homogeneity of variance
+bartlett.test(Butterflies_allperiods_df[, c("richness_current", "richness_ssp126", "richness_ssp585")]) #p-value < 2.2e-16
+# data does not meet the assumption of homogeneity of variance
+
+kruskal.test(Butterflies_allperiods_df[, c("richness_current", "richness_ssp126", "richness_ssp585")])
+# chi-squared = 3733.6, df = 2, p-value < 2.2e-16
+
+# Perform the Dunn's test to see if all groups differ
+dunn.test(Butterflies_allperiods_df[, c("richness_current", "richness_ssp126", "richness_ssp585")], IFR_df$group, method="bonferroni")
+#  Dunn's test chi-squared = 3733.5837, df = 2, p-value < 0.0001
+
+
+# Checking the significance of difference in interactions richness
+Interactions_allperiods_df <- data.frame(
+  richness_current = c(sites_cond_10_int_filter$richness, rep(0, 1503 - length(sites_cond_10_int_filter$richness))),
+  richness_ssp126 = sites_cond_ssp126_interactions_filter$richness,
+  richness_ssp585 = sites_cond_ssp585_interactions_filter$richness
+)
+
+# Check normality
+shapiro.test(Interactions_allperiods_df$richness_current) # p-value < 2.2e-16
+shapiro.test(Interactions_allperiods_df$richness_ssp126) # p-value < 2.2e-16
+shapiro.test(Interactions_allperiods_df$richness_ssp585) # p-value < 2.2e-16
+# data does not meet the assumption of normality
+
+# Check homogeneity of variance
+bartlett.test(Interactions_allperiods_df[, c("richness_current", "richness_ssp126", "richness_ssp585")]) #p-value < 2.2e-16
+# data does not meet the assumption of homogeneity of variance
+
+kruskal.test(Interactions_allperiods_df[, c("richness_current", "richness_ssp126", "richness_ssp585")])
+# chi-squared = 3733.6, df = 2, p-value < 2.2e-16
+
+# Perform the Dunn's test to see if all groups differ
+dunn.test(Interactions_allperiods_df[, c("richness_current", "richness_ssp126", "richness_ssp585")], IFR_df$group, method="bonferroni")
+#  Dunn's test chi-squared = 3652.7534, df = 2, p-value < 0.0001
+
+
+
+# Checking the significance of difference in IFR
+IFR_df <- cbind(current_IFR_df, SSP126_IFR_df, SSP585_IFR_df)
+IFR_df <- IFR_df[, -c(4, 5, 7,8, 10,11)]
+colnames(IFR_df) <- c("x", "y", "current", "SSP126", "SSP585")
+
+# Remove for missing values
+IFR_df <- na.omit(IFR_df)
+
+# Check normality
+shapiro.test(IFR_df$current) # p-value < 2.2e-16
+shapiro.test(IFR_df$SSP126) # p-value = 1.041e-14
+shapiro.test(IFR_df$SSP585) # p-value = 3.345e-14
+# data does not meet the assumption of normality
+
+# Check homogeneity of variance
+bartlett.test(IFR_df[, c("current", "SSP126", "SSP585")]) #p-value < 2.2e-16
+# data does not meet the assumption of homogeneity of variance
+
+kruskal.test(IFR_df[, c("current", "SSP126", "SSP585")])
+# chi-squared = 1555.1, df = 2, p-value < 2.2e-16
+
+# Perform the Dunn's test to see if all groups differ
+dunn.test(IFR_df[, c("current", "SSP126", "SSP585")], IFR_df$group, method="bonferroni")
+#  Dunn's test chi-squared = 1555.0681, df = 2, p-value < 0.0001
+
+
+
+
+
+
+current_diversity_status <- sites_cond_10_filter %>%
+  mutate(diversity_status = cut(richness, 
+                                breaks = c(-Inf, quantile(richness, 0.20),
+                                           quantile(richness, 0.40),
+                                           quantile(richness, 0.60),
+                                           quantile(richness, 0.80), Inf),
+                                labels = c('very low', 'low', 'medium', 'high', 'very high')))
+
+
+current_diversity_status <- plot(current_diversity_status$x,current_diversity_status$y,col=c("low" = "brown1", "medium" = "yellow", "high" = "lightgreen")[current_diversity_status$diversity_status],
+                                     pch=15,cex=0.5, xlab = 'Longitude', ylab = 'Latitude')
+
