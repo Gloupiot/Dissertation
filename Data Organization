@@ -1,6 +1,8 @@
 library(raster)
 library(dplyr)
 library(data.table)
+library(tidyr)
+
 
 #CREATE SITES
 # create sites of ~5 km2
@@ -227,6 +229,114 @@ for (i in 1:nrow(hp_sites_raw)) {
 
 # Fill missing values with 0
 hp_sites[is.na(hp_sites)] <- 0
+
+
+#CREATE SITE-BY-CO-OCCURENCE MATRIX
+# transform bf_sites to a simple form
+bf_sites_10_simple <- data.frame(butterfly = character(), cell_ID = character())
+
+for (i in 1:(ncol(bf_sites_10) - 1)) {
+  # Get the column name (butterfly species)
+  butterfly_name <- names(bf_sites_10)[i]
+  
+  # Find the rows where the value is 1 in the current column
+  rows_with_1 <- which(bf_sites_10[[butterfly_name]] == 1)
+  
+  # Add the butterfly name and corresponding cell_ID to the new dataframe
+  bf_sites_10_simple <- rbind(bf_sites_10_simple, data.frame(
+    butterfly = rep(butterfly_name, length(rows_with_1)),
+    cell_ID = bf_sites_10$cell_ID[rows_with_1]
+  ))
+}
+
+# transform hp_sites to a simple form
+hp_sites_10_simple <- hp_sites_10[, -(2:3)]
+
+# Convert dataframes to data.tables
+bf_dt <- data.table(bf_sites_10_simple)
+hp_dt <- data.table(hp_sites_10_simple)
+
+hp_dt1 <- hp_dt
+hp_dt <- hp_dt[!duplicated(hp_dt),]
+hp_dt <- hp_dt[-which(hp_dt$species==""),]
+sites_cooc_10 <- data.frame(cbind(bf_dt),matrix(0,nrow(bf_dt),length(unique(hp_dt$species))))
+names(sites_cooc_10)[3:ncol(sites_cooc_10)] <- sort(unique(hp_dt$species))
+for(i in unique(sites_cooc_10$cell_ID)){
+  toto <- hp_dt$species[which(hp_dt$cell_ID==i)]
+  sites_cooc_10[which(sites_cooc_10$cell_ID==i),which(names(sites_cooc_10) %in% toto)] <- 1
+}
+
+column_names <- names(sites_cooc_10[3:ncol(sites_cooc_10)])
+single_word_cols <- c(FALSE, FALSE, sapply(column_names, function(x) length(strsplit(x, " ")[[1]]) == 1))
+sites_cooc_10 <- sites_cooc_10[, !single_word_cols]
+
+diet_01.all <- diet_01
+diet_01 <- diet_01[,which((names(diet_01) %in% names(sites_cooc_10)))]
+
+# make the interaction dataframe
+toto <- sites_cooc_10[,3:ncol(sites_cooc_10)] ##select only the 0/1 data
+toto <- toto %>% relocate(order(colnames(toto))) ## reorder columns alphabetically
+sites_cooc_10[,3:ncol(sites_cooc_10)] <- toto ## replace the original data by the reordered data
+colnames(sites_cooc_10)[3:ncol(sites_cooc_10)] <- colnames(toto) ##update column names
+
+sites_cooc_10.save <- sites_cooc_10 ## data frame with 1's if the plant is present - does not account for diet yet
+
+diet_01 <- diet_01 %>% relocate(order(colnames(diet_01))) ##reorder columns alphabetically
+colnames(diet_01) <- sort(colnames(diet_01)) ##update column names
+for(i in sort(unique(sites_cooc_10$butterflies))){ ##for each butterfly
+  #i <- sort(unique(sites_cooc_10$butterflies))[1] ##if you need to debug
+  tata <- which(sites_cooc_10$butterflies==i) ##find the rows for this butterfly
+  toto <- sites_cooc_10[tata,3:ncol(sites_cooc_10)] ####select the data for this butterfly and remove first 2 columns
+  
+  titi <- which(row.names(diet_01)==i) ##find the diet for this butterfly
+  if(length(titi)==0)
+    print(paste("name",i,"not found"))
+  if(length(titi)>1)
+    print(paste("name",i,"found multiple times"))
+  diet_01.but <- diet_01[titi,] ## select the diet row
+  toto <- toto * matrix(rep(diet_01.but,each=nrow(toto)),nrow(toto),ncol(toto)) ##multiply the data by the diet (the diet row is replicated over multiple rows to match the dimension)
+  
+  sites_cooc_10[tata,3:ncol(sites_cooc_10)] <- toto ##put the correct data in the matrix
+}
+
+which(sites_cooc_10.save==0 & sites_cooc_10==1, arr.ind=TRUE) ##should be empty (just a check)
+
+sites_cooc_10.all <- sites_cooc_10
+for(i in sort(unique(sites_cooc_10$butterfly))){
+  toto <- as.matrix(sites_cooc_10[which(sites_cooc_10$butterfly==i),3:ncol(sites_cooc_10)])
+  tata <- unlist(diet_01[which(row.names(diet_01)==i),])
+  tata <- (matrix(rep(tata,each=nrow(toto)),nrow(toto),length(tata)))
+  sites_cooc_10[which(sites_cooc_10$butterfly==i),3:ncol(sites_cooc_10)] <- toto*tata
+  #sites_cooc_10[which(sites_cooc_10$butterfly==i),3:ncol(sites_cooc_10)] <- sites_cooc_10[which(sites_cooc_10$butterfly==i),3:ncol(sites_cooc_10)]*diet_01[which(row.names(diet_01)==sites_cooc_10$butterfly[i]),]
+}
+
+diet_01_weight <- rowSums(diet_01) #number of plants per butterfly
+#diet_01_weight[which(diet_01_weight==0)] <- 1 ##jsut a quick fix to avoid division by 0 (due to some error in diet_01)
+diet_01_weight <- diet_01_weight[order(names(diet_01_weight))] #sort alphabetically
+
+sites_cooc_10_ok <- data.frame(cell_ID=sort(unique(sites_cooc_10$cell_ID)),richness=0)
+for(j in sort(unique(sites_cooc_10$butterfly))){
+  toto <- sites_cooc_10[which(sites_cooc_10$butterfly==j),] #select butterfly "j"
+  toto <- toto[order(toto$cell_ID),] #sort cells
+  
+  tata <- data.frame(matrix(0,nrow(sites_cooc_10_ok),ncol(sites_cooc_10)-2))
+  ii <- 0
+  for(k in which(sites_cooc_10_ok$cell_ID %in% toto$cell_ID)){
+    ii <- ii+1
+    tata[k,] <- toto[ii,3:ncol(toto)]
+  }
+  tutu <- rowSums(tata)/diet_01_weight[which(names(diet_01_weight)==j)] ##attention genus vs species
+  
+  sites_cooc_10_ok$richness <- sites_cooc_10_ok$richness+tutu
+}
+
+toto <- data.frame(x=cells_10$x,y=cells_10$y,richness=NA)
+for(i in 1:nrow(sites_cooc_10_ok)){
+  toto$richness[which(cells_10$cell_ID==sites_cooc_10_ok$cell_ID[i])] <- sites_cooc_10_ok$richness[i]
+}
+
+
+
 
 
 #EXTRACT AVERAGE ANNUAL MINIMUM, MAXIMUM, TOTAL Prec AND ASSIGN DATA TO SITES (3 resolutions) - applies for past and future data
