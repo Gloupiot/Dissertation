@@ -1,0 +1,4 @@
+butterflies <- fread("/Users/gaellemairlot/Library/CloudStorage/OneDrive-UniversityofEdinburgh/Dissertation/Data/GBIF/ALL butterflies/0008110-240314170635999.zip",
+                    sep = "\t", select = c(columns_to_keep, NA, NA))
+
+butterflies <- butterflies[!(butterflies$species %in% c('Vanessa cardui', 'Colias croceus')), ]
